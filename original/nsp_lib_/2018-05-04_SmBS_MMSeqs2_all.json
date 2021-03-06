@@ -1,0 +1,35 @@
+{
+  "modeltype": "CNN_bLSTM",
+  "modelargs": {
+    "cnn_min": 7,
+    "cnn_max": 8,
+    "cnn_l2": 0,
+    "cnn_drop": 0.5,
+    "cnn_passthrough": true,
+    "lstm_dim": 1024,
+    "lstm_dropout": 0.5,
+    "lstm_levels": 2,
+    "lstm_l2": 0,
+    "dense_dim": 0,
+    "dense_dropout": 0.5,
+    "epochs": 500,
+    "batch_size": 20
+  },
+  "outputs": [
+    {"name": "q8", "w": 1},
+    {"name": "q3", "w": 5},
+    {"name": "phi", "w": 5},
+    {"name": "psi", "w": 5},
+    {"name": "rsa", "w": 100},
+    {"name": "disorder", "w": 5},
+    {"name": "interface", "w": 2}
+  ],
+  "datafile": "/home/mskl/PhD_external/NetSurfP2/01_Data/PISCES/cullpdb_pc25_res2.5_R1.0_d170914_chains12226.mmseqs.npz",
+  "save_preds": "/data/netsurfp_predictions",
+  "prev_layer": false,
+  "n_layer": null,
+  "n_folds": null,
+  "tst_fold": null,
+  "tst_samples": 500,
+  "queue": "gpu"
+}
