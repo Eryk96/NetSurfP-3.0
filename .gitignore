@@ -7,4 +7,8 @@ data_redundancy.ipynb
 /models/prot_t5_xl_bfd/*
 
 # dont include data
-/data/
+/data/nsp3/training_data/*.npz
+/data/nsp2/training_data/*.npz
+
+# dont include computerome errors or logs
+/sh/errors/*
