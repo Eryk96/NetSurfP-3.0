@@ -1,0 +1,3 @@
+ProtT5-XL-BFD: https://www.dropbox.com/sh/0e7weo5l6g1uvqi/AADBZN_vuawdR3YOUOzZRo8Pa?dl=0
+ESM-1b: https://dl.fbaipublicfiles.com/fair-esm/models/esm1b_t33_650M_UR50S.pt
+ESM-MSA-1: https://dl.fbaipublicfiles.com/fair-esm/models/esm_msa1_t12_100M_UR50S.pt
