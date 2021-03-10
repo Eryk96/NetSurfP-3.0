@@ -13,7 +13,7 @@
 ### Memory
 #PBS -l mem=32gb
 ### Requesting time - format is <days>:<hours>:<minutes>:<seconds>
-#PBS -l walltime=8:00:00
+#PBS -l walltime=02:00:00
   
 # Go to the directory from where the job was submitted (initial directory is $HOME)
 echo Working directory is $PBS_O_WORKDIR
@@ -33,4 +33,3 @@ cd ../embeddings
 papermill embeddings_esm.ipynb embeddings_esm.ipynb \
     -p data_dir "/home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp2/training_data" \
     -p model_path "/home/projects/ht3_aim/people/erikie/NSPThesis/models/esm1b_t33_650M_UR50S.pt"
-

@@ -11,4 +11,4 @@ data_redundancy.ipynb
 /data/nsp2/training_data/*.npz
 
 # dont include computerome errors or logs
-/sh/errors/*
+/notebooks/sh/errors/*
