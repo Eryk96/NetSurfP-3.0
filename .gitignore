@@ -1,10 +1,13 @@
-.DS_Store
+*.DS_Store
 data_redundancy.ipynb
-.ipynb_checkpoints
+*.ipynb_checkpoints
+*.pyc
+*.cpython-38.pyc
 
 # dont include models
 /models/*.pt
 /models/prot_t5_xl_bfd/*
+*.pt
 
 # dont include data
 /data/nsp3/training_data/*.npz
@@ -12,3 +15,4 @@ data_redundancy.ipynb
 
 # dont include computerome errors or logs
 /notebooks/sh/errors/*
+
