@@ -2,7 +2,7 @@
 **Thesis**: NetSurfP 3.0 Protein secondary structure and relative solvent accessibility
 ====
 
-The repository contains the source code for the updated version of NetSurfP 3.0, which replaces HMM profiles with embeddings from the pretrained model ESM-1b. The previous version of NetSurfP 2.0 is written with the Keras framework. Wheras the updated version works with the PyTorch framework.
+The repository contains the source code for the updated version of NetSurfP, which replaces HMM profiles with embeddings, from the pretrained model ESM-1b. The previous version of NetSurfP 2.0 is written with the Keras framework. Wheras the updated version works with the PyTorch framework.
 
 
 .. contents:: Table of Contents
