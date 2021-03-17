@@ -128,3 +128,7 @@ datasets/
 .vscode/
 .idea/
 __MACOSX/
+
+#remove error and log files
+*.log
+*.err

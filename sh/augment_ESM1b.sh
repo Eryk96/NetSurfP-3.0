@@ -11,9 +11,9 @@
 ### Number of nodes
 #PBS -l nodes=1:ppn=4:gpus=1
 ### Memory
-#PBS -l mem=32gb
+#PBS -l mem=16gb
 ### Requesting time - format is <days>:<hours>:<minutes>:<seconds>
-#PBS -l walltime=04:00:00
+#PBS -l walltime=02:00:00
   
 # Go to the directory from where the job was submitted (initial directory is $HOME)
 echo Working directory is $PBS_O_WORKDIR
@@ -24,10 +24,10 @@ module load tools
 module load anaconda3/4.4.0
 
 #Train_HHblits
-python /home/projects/ht3_aim/people/erikie/NSPThesis/nsp3/embeddings/esm1b.py \
-    -i /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp2/training_data/Train_HHblits.npz \
-    -o /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp3/training_data/Train_HHBlits_ESM1b.npz \
-    -m /home/projects/ht3_aim/people/erikie/NSPThesis/models/esm1b_t33_650M_UR50S.pt
+#python /home/projects/ht3_aim/people/erikie/NSPThesis/nsp3/embeddings/esm1b.py \
+#    -i /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp2/training_data/Train_HHblits.npz \
+#    -o /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp3/training_data/Train_HHBlits_ESM1b.npz \
+#    -m /home/projects/ht3_aim/people/erikie/NSPThesis/models/esm1b_t33_650M_UR50S.pt
 
 #CASP12_HHblits
 python /home/projects/ht3_aim/people/erikie/NSPThesis/nsp3/embeddings/esm1b.py \
