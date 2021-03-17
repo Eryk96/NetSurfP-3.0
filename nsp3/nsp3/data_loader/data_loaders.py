@@ -13,7 +13,6 @@ class NSPDataLoader(DataLoaderBase):
     def __init__(self, file, dataset, batch_size, shuffle, validation_split, nworkers):
 
         self.train_dataset = dataset(file)
-        self.validation_splot = validation_split
 
         self.init_kwargs = {
             'batch_size': batch_size,
