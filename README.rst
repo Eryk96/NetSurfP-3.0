@@ -1,7 +1,9 @@
 ====
-nsp3
+Thesis: NetSurfP Version 3.0 Protein secondary structure and relative solvent accessibility
 ====
-PyTorch deep learning project made easy.
+
+The repository contains the source code for the updated version of NetSurfP 3.0, which replaces HMM profiles with embeddings from the pretrained model ESM-1b. The previous version of NetSurfP 2.0 is written with the Keras framework. Wheras the updated version works with the PyTorch framework.
+
 
 .. contents:: Table of Contents
    :depth: 2
@@ -25,12 +27,22 @@ Folder Structure
   │    │
   │    ├── data_loader/ - anything about data loading goes here
   │    │   ├── augmentation.py
+  │    │   ├── dataset_loaders.py
   │    │   └── data_loaders.py
   │    │
-  │    ├── model/ - models, losses, and metrics
-  │    │   ├── loss.py
-  │    │   ├── metric.py
-  │    │   └── model.py
+  │    ├── embeddings/ - file with the implemented embeddings
+  │    │   └──esmb1.py
+  │    │
+  │    ├── models/ - models, losses, and metrics
+  │    │   └──CNNbLSTM
+  │    │   │  ├── loss.py
+  │    │   │  ├── metric.py
+  │    │   │  └── model.py
+  │    │   │
+  │    │   └──CNNTrans
+  │    │      ├── loss.py
+  │    │      ├── metric.py
+  │    │      └── model.py
   │    │
   │    ├── trainer/ - trainers
   │    │   └── trainer.py
@@ -40,11 +52,19 @@ Folder Structure
   │        ├── visualization.py - class for Tensorboard visualization support
   │        └── saving.py - manages pathing for saving models + logs
   │
+  ├── nsp2/* - Previous version of netsurfp (Keras framework)
+  │
   ├── logging.yml - logging configuration
   │
   ├── data/ - directory for storing input data
   │
+  ├── study/ - directory for storing optuna studies
+  │
   ├── experiments/ - directory for storing configuration files
+  │
+  ├── models/ - directory for storing pre-trained models
+  │
+  ├── notebooks/ - directory for storing notebooks used for prototyping
   │
   ├── saved/ - directory for checkpoints and logs
   │
@@ -73,53 +93,59 @@ Config files are in `.yml` format:
 
 .. code-block:: HTML
 
-  name: Mnist_LeNet
-  n_gpu: 1
-  save_dir: saved/
-  seed: 1234
+   name: NetsurfP2_CNNbLSTM_HHBlits
+   save_dir: saved/NetsurfP2_CNNbLSTM_HHBlits/
+   seed: 1234
+   target_devices: [0]
 
-  arch:
-    type: MnistModel
-    args: {}
+   arch:
+     type: CNNbLSTM
+     args:
+       init_n_channels: 50
+       out_channels: 32
+       cnn_layers: 2
+       kernel_size: [129, 257]
+       padding: [64, 128]
+       n_hidden: 50
+       dropout: 0.5
+       lstm_layers: 2
 
-  data_loader:
-    type: MnistDataLoader
-    args:
-      batch_size: 128
-      data_dir: data/
-      num_workers: 2
-      shuffle: true
-      validation_split: 0.1
+   dataset_loader:
+     type: NSPData
 
-  loss: nll_loss
+   data_loader:
+     type: NSPDataLoader
+     args:
+       batch_size: 15
+       file: ../data/nsp2/training_data/Train_HHBlits.npz
+       nworkers: 2
+       shuffle: true
+       validation_split: 0.05
 
-  lr_scheduler:
-    type: StepLR
-    args:
-      gamma: 0.1
-      step_size: 50
+   loss: multi_task_loss
 
-  metrics:
-  - my_metric
-  - my_metric2
+   metrics:
+   - metric_ss8
+   - metric_ss3
+   - metric_dis_mcc
+   - metric_dis_fpr
+   - metric_rsa
+   - metric_asa
+   - metric_phi
+   - metric_psi
 
-  optimizer:
-    type: Adam
-    args:
-      lr: 0.001
-      weight_decay: 0
+   optimizer:
+     type: Adam
+     args:
+       lr: 5e-3
+       weight_decay: 0
 
-  training:
-    early_stop: 10
-    epochs: 100
-    monitor: min val_loss
-    save_period: 1
-    tensorboard: true
-
-  testing:
-    data_dir: data/
-    batch_size: 128
-    num_workers: 8
+   training:
+     early_stop: 3
+     epochs: 100
+     monitor: min val_loss
+     save_period: 1
+     tensorboard: true
 
 
 Add addional configurations if you need.
@@ -146,7 +172,7 @@ You can specify the name of the training session in config files:
 
 .. code-block:: HTML
 
-  "name": "MNIST_LeNet"
+  "name": "NetsurfP2_CNNbLSTM_HHBlits"
 
 The checkpoints will be saved in `save_dir/name/timestamp/checkpoint_epoch_n`, with timestamp in
 mmdd_HHMMSS format.
