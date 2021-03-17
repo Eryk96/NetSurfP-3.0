@@ -108,8 +108,9 @@ if __name__ == '__main__':
     dataset = np.load(args.input)['data']
     sequences, residues, classes = dataset.shape
 
-    augmented_dataset = np.empty([sequences, residues, classes+embedding_size])
-    augmented_dataset[:sequences, :residues, :classes] = dataset
+    # allow for the addition of start and end embedding residues
+    augmented_dataset = np.empty([sequences, residues+2, classes+embedding_size])
+    augmented_dataset[:sequences, 1:residues+1, :classes] = dataset
     decoded_sequences = decode_to_protein_sequence(dataset)
 
     with torch.no_grad():
@@ -138,5 +139,5 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
             print("Batch {} out of {}".format(i+batch_size, sequences))
 
-        augmented_dataset.savez_compressed(args.output, data=augmented_dataset)
+        np.savez_compressed(args.output, data=augmented_dataset)
         print("Succesfully augmented dataset")
