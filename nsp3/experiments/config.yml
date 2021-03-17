@@ -1,4 +1,4 @@
-name: Mnist_LeNet
+name: NetsurfP2_CNNbLSTM
 save_dir: saved/
 seed: 1234
 target_devices: [0]
@@ -7,9 +7,8 @@ arch:
   type: MnistModel
   args: {}
 
-augmentation:
-  type: MNISTTransforms
-  args: {}
+dataset_loader:
+  type: NSPData
 
 data_loader:
   type: MnistDataLoader
@@ -18,7 +17,7 @@ data_loader:
     data_dir: data/
     nworkers: 2
     shuffle: true
-    validation_split: 0.1
+    validation_split: 0.05
 
 loss: nll_loss
 
