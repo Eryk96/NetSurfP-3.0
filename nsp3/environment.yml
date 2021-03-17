@@ -1,0 +1,31 @@
+name: nsp3
+
+channels:
+  - pytorch
+  - conda-forge
+
+dependencies:
+  - python=3.8
+  - numpy
+  - scipy
+  - matplotlib
+  - pandas
+  - pytest
+  - flake8
+  - rope
+  - autopep8
+  - black
+  - click
+  - jupyter
+  - pyyaml
+  - pytorch>=1.8.0
+  - torchvision
+  - cudatoolkit=10.0
+  - tensorboard>=1.14
+  - absl-py
+  - future
+  - tqdm
+  - optuna
+  - pip
+  - pip:
+    - -e .  # install package in development mode
