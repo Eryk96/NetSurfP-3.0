@@ -15,14 +15,11 @@ arch:
     dropout: 0.5
     lstm_layers: 2
 
-dataset_loader:
-  type: NSPData
-
 data_loader:
   type: NSPDataLoader
   args:
+    train: ../data/nsp2/training_data/Train_HHblits_small.npz
     batch_size: 15
-    file: ../data/nsp2/training_data/Train_HHBlits.npz
     nworkers: 2
     shuffle: true
     validation_split: 0.05
@@ -30,24 +27,27 @@ data_loader:
 loss: multi_task_loss
 
 metrics:
-- metric_ss8
-- metric_ss3
-- metric_dis_mcc
-- metric_dis_fpr
-- metric_rsa
-- metric_asa
-- metric_phi
-- metric_psi
+  metric_ss8: 0
+  metric_ss3: 1
+  metric_dis_mcc: 2
+  metric_dis_fpr: 2
+  metric_rsa: 3
+  metric_asa: 3
+  metric_phi: 4
+  metric_psi: 5
 
 optimizer:
   type: Adam
   args:
-    lr: 5e-3
+    lr: 0.0005
     weight_decay: 0
 
+lr_scheduler: 
+  type: null
+
 training:
-  early_stop: 10
-  epochs: 100
+  early_stop: 3
+  epochs: 10
   monitor: min val_loss
   save_period: 1
   tensorboard: true

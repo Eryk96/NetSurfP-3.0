@@ -25,7 +25,7 @@ setup(
     author="Erik Kiehl",
     author_email="erik.kiehl@hotmail.dk",
     description="Thesis",
-    long_description=read("README.rst"),
+    long_description=read("../README.rst"),
     packages=find_packages(exclude=("tests",)),
     entry_points={
         "console_scripts": [

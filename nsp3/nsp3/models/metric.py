@@ -1,14 +1,15 @@
 import torch
+import numpy as np
 
-def get_mask(labels, disorder_mask=False, unknown_mask=False):
+def get_mask(labels, use_disorder_mask=False, use_unknown_mask=False):
     evaluation_mask = labels[:, :, 2]
     zero_mask = labels[:, :, 0] * evaluation_mask
     disorder_mask = labels[:, :, 1]
     unknown_mask = labels[:, :, -1]
 
-    if disorder_mask:
+    if use_disorder_mask:
         zero_mask = zero_mask * disorder_mask
-    if unknown_mask:
+    if use_unknown_mask:
         zero_mask = zero_mask * unknown_mask
 
     return zero_mask
@@ -101,7 +102,7 @@ def accuracy(pred, labels):
     
     return (sum((pred == labels)) / len(labels)).item()
 
-def metric_ss8(outputs, labels, mask):
+def metric_ss8(outputs, labels):
     mask = get_mask(labels)
 
     labels = torch.argmax(labels[:, :, 7:15], dim=2)[mask == 1]
@@ -110,10 +111,10 @@ def metric_ss8(outputs, labels, mask):
     return accuracy(outputs, labels)
     
 
-def metric_ss3(outputs, labels, mask):
+def metric_ss3(outputs, labels):
     mask = get_mask(labels)
 
-    structure_mask = torch.tensor([0,0,0,1,1,2,2,2])
+    structure_mask = torch.tensor([0,0,0,1,1,2,2,2]).to(labels.device)
 
     labels = torch.max(labels[:, :, 7:15] * structure_mask, dim=2)[0].long()[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
@@ -142,7 +143,7 @@ def metric_dis_fpr(outputs, labels):
 
 
 def metric_rsa(outputs, labels):
-    mask = get_mask(labels, disorder_mask=True, unknown_mask=True)
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 5].unsqueeze(2)[mask == 1]
     outputs = outputs[mask == 1]
@@ -151,7 +152,7 @@ def metric_rsa(outputs, labels):
 
 
 def metric_asa(outputs, labels):
-    mask = get_mask(labels, disorder_mask=True, unknown_mask=True)
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     outputs = (outputs * labels[:, :, 17].unsqueeze(2))[mask == 1]
     labels = labels[:, :, 3].unsqueeze(2)[mask == 1]
@@ -160,7 +161,7 @@ def metric_asa(outputs, labels):
 
 
 def metric_phi(outputs, labels):    
-    mask = get_mask(labels, disorder_mask=True, unknown_mask=True)
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 15]
     mask = mask * (labels != 360).int()
@@ -172,7 +173,7 @@ def metric_phi(outputs, labels):
     
 
 def metric_psi(outputs, labels):
-    mask = get_mask(labels, disorder_mask=True, unknown_mask=True)
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 16]
     mask = mask * (labels != 360).int()

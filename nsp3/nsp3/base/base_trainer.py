@@ -18,10 +18,11 @@ class TrainerBase:
     """
     Base class for all trainers
     """
-    def __init__(self, model, loss, metrics, optimizer, start_epoch, config, device):
+    def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device):
         self.model = model
         self.loss = loss
         self.metrics = metrics
+        self.metrics_task = metrics_task
         self.optimizer = optimizer
         self.start_epoch = start_epoch
         self.config = config

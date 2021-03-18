@@ -1,4 +1,5 @@
 import os
+import pdb
 import random
 from typing import Any, List, Tuple, Dict
 from types import ModuleType
@@ -11,9 +12,12 @@ import torch.optim.lr_scheduler as module_scheduler
 
 import nsp3.data_loader.augmentation as module_aug
 import nsp3.data_loader.data_loaders as module_data
-import nsp3.model.loss as module_loss
-import nsp3.model.metric as module_metric
-import nsp3.model.model as module_arch
+import nsp3.models.loss as module_loss
+import nsp3.models.metric as module_metric
+import nsp3.models as module_arch
+
+import nsp3.models as module_models
+
 from nsp3.trainer import Trainer
 from nsp3.utils import setup_logger
 
@@ -26,6 +30,7 @@ def train(cfg: Dict, resume: str) -> None:
     seed_everything(cfg['seed'])
 
     model = get_instance(module_arch, 'arch', cfg)
+
     model, device = setup_device(model, cfg['target_devices'])
     torch.backends.cudnn.benchmark = True  # disable if not consistent input sizes
 
@@ -34,16 +39,17 @@ def train(cfg: Dict, resume: str) -> None:
     lr_scheduler = get_instance(module_scheduler, 'lr_scheduler', cfg, optimizer)
     model, optimizer, start_epoch = resume_checkpoint(resume, model, optimizer, cfg)
 
-    transforms = get_instance(module_aug, 'augmentation', cfg)
-    data_loader = get_instance(module_data, 'data_loader', cfg, transforms)
+    data_loader = get_instance(module_data, 'data_loader', cfg)
     valid_data_loader = data_loader.split_validation()
 
     log.info('Getting loss and metric function handles')
     loss = getattr(module_loss, cfg['loss'])
-    metrics = [getattr(module_metric, met) for met in cfg['metrics']]
+    
+    metrics = [getattr(module_metric, met) for met, _ in cfg['metrics'].items()]
+    metrics_task = [task for _, task in cfg['metrics'].items()]
 
     log.info('Initialising trainer')
-    trainer = Trainer(model, loss, metrics, optimizer,
+    trainer = Trainer(model, loss, metrics, metrics_task, optimizer,
                         start_epoch=start_epoch,
                         config=cfg,
                         device=device,
@@ -88,6 +94,7 @@ def setup_device(
 
     log.info(f'Using devices {target_devices} of available devices {available_devices}')
     device = torch.device(f'cuda:{target_devices[0]}')
+
     if len(target_devices) > 1:
         model = nn.DataParallel(model, device_ids=target_devices).to(device)
     else:
@@ -142,7 +149,12 @@ def get_instance(
     args : Any
         Positional arguments to be given before ``kwargs`` in ``config``.
     """
+
     ctor_name = config[name]['type']
+
+    if ctor_name == None:
+        return None
+
     log.info(f'Building: {module.__name__}.{ctor_name}')
     return getattr(module, ctor_name)(*args, **config[name]['args'])
 

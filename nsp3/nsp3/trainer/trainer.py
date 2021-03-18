@@ -14,9 +14,9 @@ class Trainer(TrainerBase):
     Responsible for training loop and validation.
     """
 
-    def __init__(self, model, loss, metrics, optimizer, start_epoch, config, device,
+    def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device,
                  data_loader, valid_data_loader=None, lr_scheduler=None):
-        super().__init__(model, loss, metrics, optimizer, start_epoch, config, device)
+        super().__init__(model, loss, metrics, metrics_task, optimizer, start_epoch, config, device)
         self.data_loader = data_loader
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
@@ -37,11 +37,11 @@ class Trainer(TrainerBase):
         loss_mtr = AverageMeter('loss')
         metric_mtrs = [AverageMeter(m.__name__) for m in self.metrics]
 
-        for batch_idx, (data, target) in enumerate(self.data_loader):
+        for batch_idx, (data, target, mask) in enumerate(self.data_loader):
             data, target = data.to(self.device), target.to(self.device)
 
             self.optimizer.zero_grad()
-            output = self.model(data)
+            output = self.model(data, mask)
             loss = self.loss(output, target)
             loss.backward()
             self.optimizer.step()
@@ -58,9 +58,6 @@ class Trainer(TrainerBase):
                     epoch, batch_idx, self.data_loader.batch_size,
                     len(self.data_loader), loss.item()
                 )
-
-            if batch_idx == 0:
-                self.writer.add_image('data', make_grid(data.cpu(), nrow=8, normalize=True))
 
         del data
         del target
@@ -94,8 +91,10 @@ class Trainer(TrainerBase):
 
     def _eval_metrics(self, output, target):
         with torch.no_grad():
+            i = 0
             for metric in self.metrics:
-                value = metric(output, target)
+                value = metric(output[self.metrics_task[i]], target)
+                i += 1
                 yield value
 
     def _valid_epoch(self, epoch: int) -> dict:
@@ -111,15 +110,13 @@ class Trainer(TrainerBase):
         loss_mtr = AverageMeter('loss')
         metric_mtrs = [AverageMeter(m.__name__) for m in self.metrics]
         with torch.no_grad():
-            for batch_idx, (data, target) in enumerate(self.valid_data_loader):
+            for batch_idx, (data, target, mask) in enumerate(self.valid_data_loader):
                 data, target = data.to(self.device), target.to(self.device)
-                output = self.model(data)
+                output = self.model(data, mask)
                 loss = self.loss(output, target)
                 loss_mtr.update(loss.item(), data.size(0))
                 for mtr, value in zip(metric_mtrs, self._eval_metrics(output, target)):
                     mtr.update(value, data.size(0))
-                if batch_idx == 0:
-                    self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         del data
         del target

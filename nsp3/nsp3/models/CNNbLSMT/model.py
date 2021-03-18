@@ -1,5 +1,7 @@
+import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from nsp3.base import ModelBase
 from nsp3.utils import setup_logger
@@ -21,20 +23,18 @@ class CNNbLSTM(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(NSPNetwork, self).__init__()
-
-        self.cnn_layers = cnn_layers
+        super(CNNbLSTM, self).__init__()
 
         # CNN blocks
-        self.conv = []
-        for i in range(self.cnn_layers):
+        self.conv = nn.ModuleList()
+        for i in range(cnn_layers):
             self.conv.append(nn.Sequential(*[
                 nn.Dropout(p=dropout),
                 nn.Conv1d(in_channels=init_n_channels, out_channels=out_channels, kernel_size=kernel_size[i], padding=padding[i]),
                 nn.ReLU(),
             ]))
 
-        self.batch_norm = MaskedBatchNorm1d(init_n_channels+(out_channels*2))
+        self.batch_norm = nn.BatchNorm1d(init_n_channels+(out_channels*2))
 
         # LSTM block
         self.lstm = nn.LSTM(input_size=init_n_channels+(out_channels*2), hidden_size=n_hidden, batch_first=True, \
@@ -66,7 +66,7 @@ class CNNbLSTM(ModelBase):
 
         log.info(f'<init>: \n{self}')
         
-    def forward(self, x, lengths, mask):
+    def forward(self, x, mask):
         max_length = x.size(1)
 
         # calculate the residuals
@@ -74,14 +74,14 @@ class CNNbLSTM(ModelBase):
 
         # concatenate channels from residuals and input + batch norm
         r = x
-        for i in range(self.cnn_layers):
-            r = torch.cat([r, self.conv[i](x)], dim=1)
+        for layer in self.conv:
+            r = torch.cat([r, layer(x)], dim=1)
 
-        x = self.batch_norm(r, mask.unsqueeze(1))
+        x = self.batch_norm(r)
 
         # calculate double layer bidirectional lstm
         x = x.permute(0,2,1)
-        x = pack_padded_sequence(x, lengths, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, mask, batch_first=True, enforce_sorted=False)
         x, _ = self.lstm(x)
         x, _ = pad_packed_sequence(x, total_length=max_length, batch_first=True)
         x = self.lstm_dropout_layer(x)
