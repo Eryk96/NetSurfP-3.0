@@ -15,10 +15,13 @@ arch:
     dropout: 0.5
     lstm_layers: 2
 
-data_loader:
+train_loader:
   type: NSPDataLoader
   args:
-    train: ../data/nsp2/training_data/Train_HHblits_small.npz
+    train_path: [../data/nsp2/training_data/Train_HHblits_small.npz]
+    test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
+                ../data/nsp2/training_data/CB513_HHblits.npz, 
+                ../data/nsp2/training_data/TS115_HHblits.npz]
     batch_size: 15
     nworkers: 2
     shuffle: true

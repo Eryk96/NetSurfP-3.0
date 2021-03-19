@@ -19,6 +19,7 @@ import nsp3.models as module_arch
 import nsp3.models as module_models
 
 from nsp3.trainer import Trainer
+from nsp3.eval import Evaluate
 from nsp3.utils import setup_logger
 
 
@@ -41,6 +42,7 @@ def train(cfg: Dict, resume: str) -> None:
 
     data_loader = get_instance(module_data, 'data_loader', cfg)
     valid_data_loader = data_loader.split_validation()
+    test_data_loader = data_loader.get_test()
 
     log.info('Getting loss and metric function handles')
     loss = getattr(module_loss, cfg['loss'])
@@ -58,6 +60,17 @@ def train(cfg: Dict, resume: str) -> None:
                         lr_scheduler=lr_scheduler)
 
     trainer.train()
+
+    log.info('Initialising evaluation')
+    
+    for _test_data_loader in test_data_loader:
+        evaluation = Evaluate(model, metrics, metrics_task, start_epoch, 
+                            start_epoch=start_epoch,
+                            config=cfg,
+                            device=device
+                            test_data_loader=_test_data_loader)
+        evaluation.evaluate()
+
     log.info('Finished!')
 
 

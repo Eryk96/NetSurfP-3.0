@@ -12,3 +12,9 @@ class DataLoaderBase(DataLoader):
         Return a `torch.utils.data.DataLoader` for validation, or None if not available.
         """
         raise NotImplementedError
+
+    def get_test(self) -> List:
+        """
+        Return a `List` containing test sets, or None if not available.
+        """
+        raise NotImplementedError
