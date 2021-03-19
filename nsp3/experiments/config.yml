@@ -15,7 +15,7 @@ arch:
     dropout: 0.5
     lstm_layers: 2
 
-train_loader:
+data_loader:
   type: NSPDataLoader
   args:
     train_path: [../data/nsp2/training_data/Train_HHblits_small.npz]
@@ -50,7 +50,7 @@ lr_scheduler:
 
 training:
   early_stop: 3
-  epochs: 10
+  epochs: 1
   monitor: min val_loss
   save_period: 1
   tensorboard: true

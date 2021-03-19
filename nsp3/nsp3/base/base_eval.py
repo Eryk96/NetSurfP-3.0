@@ -1,3 +1,5 @@
+import torch
+
 from nsp3.utils import (
     setup_logger,
 )
@@ -8,15 +10,17 @@ class EvaluateBase:
     """
     Base class for all evaluators
     """
-    def __init__(self, model, metrics, metrics_task, start_epoch, config, device):
+    def __init__(self, model, metrics, metrics_task, checkpoint_dir, writer_dir, device):
         self.model = model
         self.metrics = metrics
         self.metrics_task = metrics_task
-        self.config = config
         self.device = device
 
-        self.checkpoint_dir, self.writer_dir = trainer_paths(config)
-        self.model = torch.load_state_dict(torch.load(self.checkpoint_dir / 'model_best.pth'))
+        self.checkpoint_dir = checkpoint_dir
+        self.writer_dir = writer_dir
+
+        model_best = torch.load(self.checkpoint_dir / 'model_best.pth')
+        self.model.load_state_dict(model_best['state_dict'])
 
         self.evaluations = {}
 
@@ -25,8 +29,8 @@ class EvaluateBase:
         Full evaluation logic
         """
         log.info('Starting evaluating...')
-        for epoch in range(self.start_epoch, self.epochs):
-            result = self._evaluate_epoch(epoch)
+        for _ in range(1):
+            result = self._evaluate_epoch()
 
             # save logged informations into log dict
             for key, value in result.items():
@@ -36,11 +40,13 @@ class EvaluateBase:
                     self.evaluations[key] = value
 
         for metric, value in self.evaluations.items():
-            log.info("{}: {}".format(metric, value.avg))
+            log.info("{}: {}".format(metric, float(value)))
 
-    def _evaluate_epoch(self, epoch: int) -> dict:
+        self._write_test()
+
+    def _evaluate_epoch(self) -> dict:
         """
-        Evaluation logic for an epoch.
+        Evaluation logic for the single epoch.
         """
         raise NotImplementedError
 

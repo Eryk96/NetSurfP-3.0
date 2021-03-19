@@ -1,18 +1,20 @@
+import torch
+import numpy as np
 
-from np3.base import EvaluateBase, AverageMeter
+from nsp3.base import EvaluateBase, AverageMeter
 
 class Evaluate(EvaluateBase):
     """
     Responsible for test evaluation and the metrics.
     """
-    def __init__(self, model, metrics, metrics_task, start_epoch, config, device,
-            name, test_data_loader):
-    super().__init__(model, metrics, metrics_task, start_epoch, config, device)
+    def __init__(self, model, metrics, metrics_task, device,
+            test_data_loader, checkpoint_dir, writer_dir):
+        super().__init__(model, metrics, metrics_task, checkpoint_dir, writer_dir, device)
     
-    self.path = test_data_loader[0]
-    self.test_data_loader = test_data_loader[1]
+        self.path = test_data_loader[0]
+        self.test_data_loader = test_data_loader[1]
     
-    def _evaluate_epoch(self, epoch: int) -> dict:
+    def _evaluate_epoch(self) -> dict:
         """
         Evaluation of test
         """
@@ -31,7 +33,9 @@ class Evaluate(EvaluateBase):
         del output
         torch.cuda.empty_cache()
 
-        results = { mtr.name: mtr.avg for mtr in metric_mtrs] }
+        results = {}
+        for mtr in metric_mtrs:
+            results[mtr.name] = mtr.avg
 
         return results
 
@@ -49,7 +53,7 @@ class Evaluate(EvaluateBase):
         """
         Write test results
         """
-        with evalf as open(self.writer_dir / "results", "a"):
+        with open(self.writer_dir / "results", "a") as evalf:
             evalf.write(self.path + "\n")
             for metric, value in self.evaluations.items():
-                evalf.write("{}: {}\n".format(metric, value.avg))
+                evalf.write("{}: {}\n".format(metric, value))

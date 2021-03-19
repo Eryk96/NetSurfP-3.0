@@ -1,7 +1,7 @@
-import numpy as np
 import torch
-from torchvision.utils import make_grid
+import numpy as np
 
+from torchvision.utils import make_grid
 from nsp3.base import TrainerBase, AverageMeter
 from nsp3.utils import setup_logger
 

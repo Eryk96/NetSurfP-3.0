@@ -9,7 +9,7 @@ class NSPDataLoader(DataLoaderBase):
     """
     MNIST data loading demo using DataLoaderBase
     """
-    def __init__(self, train_path, test_path=None, batch_size, shuffle, validation_split, nworkers):
+    def __init__(self, train_path, batch_size, shuffle, validation_split, nworkers, test_path=None,):
         self.train_dataset = NSPData(train_path[0])
         self.valid_dataset = NSPData(train_path[0])
 
@@ -54,5 +54,5 @@ class NSPDataLoader(DataLoaderBase):
     def get_test(self):
         test_data = []
         for path in self.test_path:
-            test_data.append((path, DataLoader(path, **self.init_kwargs)))
+            test_data.append((path, DataLoader(NSPData(path), **self.init_kwargs)))
         return test_data

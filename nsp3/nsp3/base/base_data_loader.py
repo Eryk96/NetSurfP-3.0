@@ -13,7 +13,7 @@ class DataLoaderBase(DataLoader):
         """
         raise NotImplementedError
 
-    def get_test(self) -> List:
+    def get_test(self) -> list:
         """
         Return a `List` containing test sets, or None if not available.
         """

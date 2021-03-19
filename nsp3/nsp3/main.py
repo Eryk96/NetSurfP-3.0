@@ -64,11 +64,11 @@ def train(cfg: Dict, resume: str) -> None:
     log.info('Initialising evaluation')
     
     for _test_data_loader in test_data_loader:
-        evaluation = Evaluate(model, metrics, metrics_task, start_epoch, 
-                            start_epoch=start_epoch,
-                            config=cfg,
-                            device=device
-                            test_data_loader=_test_data_loader)
+        evaluation = Evaluate(model, metrics, metrics_task,
+                                device=device,
+                                test_data_loader=_test_data_loader,
+                                checkpoint_dir=trainer.checkpoint_dir,
+                                writer_dir=trainer.writer_dir)
         evaluation.evaluate()
 
     log.info('Finished!')

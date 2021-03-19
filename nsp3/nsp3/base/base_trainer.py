@@ -30,8 +30,8 @@ class TrainerBase:
 
         self._setup_monitoring(config['training'])
 
-        self.checkpoint_dir, writer_dir = trainer_paths(config)
-        self.writer = TensorboardWriter(writer_dir, config['training']['tensorboard'])
+        self.checkpoint_dir, self.writer_dir = trainer_paths(config)
+        self.writer = TensorboardWriter(self.writer_dir, config['training']['tensorboard'])
 
         # Save configuration file into checkpoint directory:
         config_save_path = Path(self.checkpoint_dir) / 'config.yml'
