@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import h5py
 import pdb
 import esm
 import math
@@ -105,39 +106,40 @@ if __name__ == '__main__':
 
     embedding_size = 1280
 
-    dataset = np.load(args.input)['data']
-    sequences, residues, classes = dataset.shape
+    with h5py.File(args.output, 'w') as f:
+        dataset = np.load(args.input)['data']
+        sequences, residues, classes = dataset.shape
 
-    # allow for the addition of start and end embedding residues
-    augmented_dataset = np.empty([sequences, residues+2, classes+embedding_size])
-    augmented_dataset[:sequences, 1:residues+1, :classes] = dataset
-    decoded_sequences = decode_to_protein_sequence(dataset)
+        # allow for the addition of start and end embedding residues
+        augmented_dataset = f.create_dataset('dataset', (sequences, residues+2, classes+embedding_size), dtype='float64', compression="gzip", compression_opts=9)
+        augmented_dataset[:sequences, 1:residues+1, :classes] = dataset
 
-    with torch.no_grad():
-        # Create embedding model
-        model = ESM1bEmbedding(model_path)
+        decoded_sequences = decode_to_protein_sequence(dataset)
 
-        # Try to move model to GPU if possible
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        with torch.no_grad():
+            # Create embedding model
+            model = ESM1bEmbedding(model_path)
 
-        try:
-            model = model.cuda(device)
-        except RuntimeError:
-            device = 'cpu'
-            
-        model = model.eval()
+            # Try to move model to GPU if possible
+            device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-        # Augment dataset with embeddings
-        batch_size = 2
-        for i in range(0, sequences, batch_size):
-            embedding = model(decoded_sequences[i:i+batch_size])
+            try:
+                model = model.cuda(device)
+            except RuntimeError:
+                device = 'cpu'
+                
+            model = model.eval()
 
-            # add embedding to the loaded dataset
-            embedding_sequences, embedding_residues, embedding_classes = embedding.shape
-            augmented_dataset[i:i+batch_size, :embedding_residues, classes:] = embedding
+            # Augment dataset with embeddings
+            batch_size = 2
+            for i in range(0, sequences, batch_size):
+                embedding = model(decoded_sequences[i:i+batch_size])
 
-            torch.cuda.empty_cache()
-            print("Batch {} out of {}".format(i+batch_size, sequences))
+                # add embedding to the loaded dataset
+                embedding_sequences, embedding_residues, embedding_classes = embedding.shape
+                augmented_dataset[i:i+batch_size, :embedding_residues, classes:] = embedding
 
-        np.savez_compressed(args.output, data=augmented_dataset)
+                torch.cuda.empty_cache()
+                print("Batch {} out of {}".format(i+batch_size, sequences))
+
         print("Succesfully augmented dataset")
