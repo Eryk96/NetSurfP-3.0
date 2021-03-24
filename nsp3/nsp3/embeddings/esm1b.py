@@ -54,7 +54,6 @@ def decode_to_protein_sequence(dataset):
 
     return sequences
 
-
 class ESM1bEmbedding(nn.Module):
     def __init__(self, model_path, max_embedding = 1024, offset = 200):
         super(ESM1bEmbedding, self).__init__()
