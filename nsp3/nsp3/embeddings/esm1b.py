@@ -130,7 +130,7 @@ if __name__ == '__main__':
             model = model.eval()
 
             # Augment dataset with embeddings
-            batch_size = 2
+            batch_size = 5
             for i in range(0, sequences, batch_size):
                 embedding = model(decoded_sequences[i:i+batch_size])
 
