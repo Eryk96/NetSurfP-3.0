@@ -110,8 +110,8 @@ if __name__ == '__main__':
         sequences, residues, classes = dataset.shape
 
         # allow for the addition of start and end embedding residues
-        augmented_dataset = f.create_dataset('dataset', (sequences, residues+2, classes+embedding_size), dtype='float64', compression="gzip", compression_opts=9)
-        augmented_dataset[:sequences, 1:residues+1, :classes] = dataset
+        augmented_dataset = f.create_dataset('dataset', (sequences, residues, classes+embedding_size), dtype='float64', compression="gzip", compression_opts=9)
+        augmented_dataset[:sequences, :residues, :classes] = dataset
 
         decoded_sequences = decode_to_protein_sequence(dataset)
 
@@ -130,15 +130,31 @@ if __name__ == '__main__':
             model = model.eval()
 
             # Augment dataset with embeddings
-            batch_size = 5
+            mini_batch = 2
+            batch_size = 1000
             for i in range(0, sequences, batch_size):
-                embedding = model(decoded_sequences[i:i+batch_size])
+                embedding = np.zeros([i+batch_size, residues, embedding_size])
+
+                n_embeddings = int()
+                for j in range(0, i+batch_size, mini_batch):
+                    if i+j > sequences:
+                        break
+
+                    embedding_model = model(decoded_sequences[i+j:i+j+mini_batch])
+
+                    embedding_residues = embedding_model.shape[1]
+                    embedding[i:i+mini_batch, :embedding_residues-2] = embedding_model[:, 1:embedding_residues-1]
+                    torch.cuda.empty_cache()
+
+                    n_embeddings += mini_batch
+
+                    if n_embeddings > sequences:
+                        n_embeddings = sequences
+
+                    print("Batch {} out of {}".format(i+j+mini_batch, sequences))
 
                 # add embedding to the loaded dataset
                 embedding_sequences, embedding_residues, embedding_classes = embedding.shape
-                augmented_dataset[i:i+batch_size, :embedding_residues, classes:] = embedding
-
-                torch.cuda.empty_cache()
-                print("Batch {} out of {}".format(i+batch_size, sequences))
+                augmented_dataset[i:i+n_embeddings, :embedding_residues, classes:] = embedding[n_embeddings]
 
         print("Succesfully augmented dataset")

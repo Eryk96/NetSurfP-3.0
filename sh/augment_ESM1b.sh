@@ -34,3 +34,8 @@ python /home/projects/ht3_aim/people/erikie/NSPThesis/nsp3/embeddings/esm1b.py \
     -i /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp2/training_data/CASP12_HHblits.npz \
     -o /home/projects/ht3_aim/people/erikie/NSPThesis/data/nsp3/training_data/CASP12_HHblits_ESM1b.npz \
     -m /home/projects/ht3_aim/people/erikie/NSPThesis/models/esm1b_t33_650M_UR50S.pt
+
+python /home/eryk/development/NSPThesis/nsp3/nsp3/embeddings/esm1b.py \
+    -i /home/eryk/development/NSPThesis/data/nsp2/training_data/CASP12_HHblits.npz \
+    -o /home/eryk/development/NSPThesis/data/nsp3/training_data/CASP12_HHblits_ESM1b.npz \
+    -m /home/eryk/development/NSPThesis/models/esm1b_t33_650M_UR50S.pt
