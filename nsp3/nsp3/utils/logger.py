@@ -5,21 +5,15 @@ from pathlib import Path
 
 from .saving import log_path
 
-
 LOG_LEVEL = logging.INFO
 
 
-def setup_logging(run_config, log_config="logging.yml") -> None:
-    """
-    Setup ``logging.config``
+def setup_logging(run_config: str, log_config: str = "logging.yml"):
+    """ Setup ``logging.config``
 
-    Parameters
-    ----------
-    run_config : str
-        Path to configuration file for run
-
-    log_config : str
-        Path to configuration file for logging
+    Args:
+        run_config: path to configuration file for run
+        log_config : path to configuration file for logging
     """
     log_config = Path(log_config)
 

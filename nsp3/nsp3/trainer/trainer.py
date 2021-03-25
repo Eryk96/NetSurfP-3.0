@@ -5,14 +5,10 @@ from torchvision.utils import make_grid
 from nsp3.base import TrainerBase, AverageMeter
 from nsp3.utils import setup_logger
 
-
 log = setup_logger(__name__)
 
-
 class Trainer(TrainerBase):
-    """
-    Responsible for training loop and validation.
-    """
+    """ Responsible for training loop and validation. """
 
     def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device,
                  data_loader, valid_data_loader=None, lr_scheduler=None):
@@ -24,13 +20,13 @@ class Trainer(TrainerBase):
         self.log_step = int(np.sqrt(data_loader.batch_size)) * 8
 
     def _train_epoch(self, epoch: int) -> dict:
-        """
-        Training logic for an epoch
+        """ Training logic for an epoch
 
-        Returns
-        -------
-        dict
-            Dictionary containing results for the epoch.
+        Args:
+            epoch: current epoch
+
+        Returns :
+            dictionary containing results for the epoch.
         """
         self.model.train()
 
@@ -40,12 +36,14 @@ class Trainer(TrainerBase):
         for batch_idx, (data, target, mask) in enumerate(self.data_loader):
             data, target = data.to(self.device), target.to(self.device)
 
+            # backpropagate using loss criterion
             self.optimizer.zero_grad()
             output = self.model(data, mask)
             loss = self.loss(output, target)
             loss.backward()
             self.optimizer.step()
 
+            # write results and metrics 
             loss_mtr.update(loss.item(), data.size(0))
 
             if batch_idx % self.log_step == 0:
@@ -59,11 +57,13 @@ class Trainer(TrainerBase):
                     len(self.data_loader), loss.item()
                 )
 
+        # cleanup
         del data
         del target
         del output
         torch.cuda.empty_cache()
 
+        # write results
         self.writer.add_scalar('epoch/loss', loss_mtr.avg)
         for mtr in metric_mtrs:
             self.writer.add_scalar(f'epoch/{mtr.name}', mtr.avg)
@@ -82,14 +82,34 @@ class Trainer(TrainerBase):
 
         return results
 
-    def _log_batch(self, epoch, batch_idx, batch_size, len_data, loss):
+
+    def _log_batch(self, epoch: int, batch_idx: int, batch_size: int, len_data: int, loss: float):
+        """ Logging of the batches
+
+        Args:
+            epoch: current epoch
+            batch_idx: indexes of the batch
+            batch_size: size of the batch
+            len_data: length of the data
+            loss: training loss of the batch
+        """
         n_samples = batch_size * len_data
         n_complete = batch_idx * batch_size
         percent = 100.0 * batch_idx / len_data
         msg = f'Train Epoch: {epoch} [{n_complete}/{n_samples} ({percent:.0f}%)] Loss: {loss:.6f}'
         log.debug(msg)
 
-    def _eval_metrics(self, output, target):
+
+    def _eval_metrics(self, output: torch.tensor, target: torch.tensor) -> float:
+        """ Evaluate metrics
+
+        Args:
+            output: output from model
+            target: labels matching the output
+
+        Returns:
+            values from each metric
+        """
         with torch.no_grad():
             i = 0
             for metric in self.metrics:
@@ -97,32 +117,40 @@ class Trainer(TrainerBase):
                 i += 1
                 yield value
 
-    def _valid_epoch(self, epoch: int) -> dict:
-        """
-        Validate after training an epoch
 
-        Returns
-        -------
-        dict
-            Contains keys 'val_loss' and 'val_metrics'.
+    def _valid_epoch(self, epoch: int) -> dict:
+        """ Validate after training an epoch
+
+        Args:
+            epoch: current epoch
+            
+        Returns:
+            contains keys 'val_loss' and 'val_metrics'.
         """
         self.model.eval()
+
         loss_mtr = AverageMeter('loss')
         metric_mtrs = [AverageMeter(m.__name__) for m in self.metrics]
+
+        # loss and metrics of validation data 
         with torch.no_grad():
             for batch_idx, (data, target, mask) in enumerate(self.valid_data_loader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data, mask)
                 loss = self.loss(output, target)
+
+                # update loss
                 loss_mtr.update(loss.item(), data.size(0))
                 for mtr, value in zip(metric_mtrs, self._eval_metrics(output, target)):
                     mtr.update(value, data.size(0))
 
+        # cleanup
         del data
         del target
         del output
         torch.cuda.empty_cache()
 
+        # write results
         self.writer.set_step(epoch, 'valid')
         self.writer.add_scalar('loss', loss_mtr.avg)
         for mtr in metric_mtrs:

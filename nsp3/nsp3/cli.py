@@ -7,9 +7,7 @@ from nsp3.utils import setup_logging
 
 @click.group()
 def cli():
-    """
-    CLI for nsp3
-    """
+    """ CLI for nsp3 """
     pass
 
 
@@ -26,9 +24,7 @@ def cli():
 )
 @click.option('-r', '--resume', default=None, type=str, help='path to checkpoint')
 def train(config_filename, resume):
-    """
-    Entry point to start training run(s).
-    """
+    """ Entry point to start training run(s). """
     configs = [load_config(f) for f in config_filename]
     for config in configs:
         setup_logging(config)
@@ -36,9 +32,7 @@ def train(config_filename, resume):
 
 
 def load_config(filename: str) -> dict:
-    """
-    Load a configuration file as YAML.
-    """
+    """ Load a configuration file as YAML. """
     with open(filename) as fh:
         config = yaml.safe_load(fh)
     return config

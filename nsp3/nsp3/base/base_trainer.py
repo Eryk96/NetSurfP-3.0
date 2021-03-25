@@ -3,6 +3,7 @@ import math
 
 import yaml
 import torch
+import torch.optim as optim
 
 from nsp3.utils import (
     setup_logger,
@@ -15,10 +16,19 @@ log = setup_logger(__name__)
 
 
 class TrainerBase:
-    """
-    Base class for all trainers
-    """
-    def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device):
+    """ Base class for all trainers """
+
+    def __init__(self, model: nn.Module, loss: Any, metrics: dict, metrics_task: dict,
+                optimizer: optim, start_epoch: int, config: dict, device: torch.device):
+        """ Constructor
+        Args:
+            model: model to use for the training
+            loss: loss criterion
+            metrics: list containing each metric
+            optimizer: optimizer method
+            start_epoch: starting epoch
+            device: device for the tensors
+        """
         self.model = model
         self.loss = loss
         self.metrics = metrics
@@ -31,18 +41,16 @@ class TrainerBase:
         self._setup_monitoring(config['training'])
 
         self.checkpoint_dir, self.writer_dir = trainer_paths(config)
-        self.writer = TensorboardWriter(self.writer_dir, config['training']['tensorboard'])
+        self.writer = TensorboardWriter(
+            self.writer_dir, config['training']['tensorboard'])
 
         # Save configuration file into checkpoint directory:
         config_save_path = Path(self.checkpoint_dir) / 'config.yml'
         with open(config_save_path, 'w') as handle:
             yaml.dump(config, handle, default_flow_style=False)
 
-
     def train(self):
-        """
-        Full training logic
-        """
+        """ Full training logic """
         log.info('Starting training...')
         for epoch in range(self.start_epoch, self.epochs):
             result = self._train_epoch(epoch)
@@ -73,7 +81,8 @@ class TrainerBase:
                     # check whether model performance improved or not, according
                     # to specified metric(mnt_metric)
                     improved = (self.mnt_mode == 'min' and results[self.mnt_metric] < self.mnt_best) or\
-                               (self.mnt_mode == 'max' and results[self.mnt_metric] > self.mnt_best)
+                               (self.mnt_mode
+                                == 'max' and results[self.mnt_metric] > self.mnt_best)
                 except KeyError:
                     log.warning(f"Warning: Metric '{self.mnt_metric}' is not found. Model "
                                         "performance monitoring is disabled.")
@@ -97,18 +106,16 @@ class TrainerBase:
                 self._save_checkpoint(epoch, save_best=best)
 
     def _train_epoch(self, epoch: int) -> dict:
-        """
-        Training logic for an epoch.
-        """
+        """ Training logic for an epoch. """
         raise NotImplementedError
 
-    def _save_checkpoint(self, epoch: int, save_best: bool=False) -> None:
-        """
-        Saving checkpoints
+    def _save_checkpoint(self, epoch: int, save_best: bool = False):
+        """ Saving checkpoints
 
-        :param epoch: current epoch number
-        :param log: logging information of the epoch
-        :param save_best: if True, rename the saved checkpoint to 'model_best.pth'
+        Args:
+            epoch: current epoch number
+            log: logging information of the epoch
+            save_best: if True, rename the saved checkpoint to 'model_best.pth'
         """
         arch = type(self.model).__name__
         state = {
@@ -128,9 +135,7 @@ class TrainerBase:
             log.info(f'Saving current best: {best_path}')
 
     def _setup_monitoring(self, config: dict) -> None:
-        """
-        Configuration to monitor model performance and save best.
-        """
+        """ Configuration to monitor model performance and save best. """
         self.epochs = config['epochs']
         self.save_period = config['save_period']
         self.monitor = config.get('monitor', 'off')
@@ -145,10 +150,8 @@ class TrainerBase:
 
 
 class AverageMeter:
-    """
-    Computes and stores the average and current value.
-    """
-
+    """ Computes and stores the average and current value. """
+    
     def __init__(self, name):
         self.name = name
         self.reset()

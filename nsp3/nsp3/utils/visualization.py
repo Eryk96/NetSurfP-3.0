@@ -34,9 +34,7 @@ class TensorboardWriter:
         self.step = step
 
     def __getattr__(self, name):
-        """
-        If visualization is configured to use:
-            return add_data() methods of tensorboard with additional information (step, tag) added.
+        """ If visualization is configured to use: return add_data() methods of tensorboard with additional information (step, tag) added.
         Otherwise:
             return a blank function handle that does nothing
         """

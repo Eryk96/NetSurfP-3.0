@@ -26,7 +26,12 @@ from nsp3.utils import setup_logger
 log = setup_logger(__name__)
 
 
-def train(cfg: Dict, resume: str) -> None:
+def train(cfg: Dict, resume: str):
+    """ Loads configuration and trains and evaluates a model
+    args:
+        cfg: dictionary containing the configuration of the experiment
+        resume: path to previous resumed model
+    """
     log.debug(f'Training: {cfg}')
     seed_everything(cfg['seed'])
 
@@ -74,12 +79,13 @@ def train(cfg: Dict, resume: str) -> None:
     log.info('Finished!')
 
 
-def setup_device(
-    model: nn.Module,
-    target_devices: List[int]
-) -> Tuple[torch.device, List[int]]:
-    """
-    setup GPU device if available, move model into configured device
+def setup_device( model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
+    """ Setup GPU device if available, move model into configured device
+    args:
+        model: Module to move to GPU
+        target_devices: list of target devices
+    returns:
+        the model that now uses the gpu and the device
     """
     available_devices = list(range(torch.cuda.device_count()))
 
@@ -115,11 +121,18 @@ def setup_device(
     return model, device
 
 
-def setup_param_groups(model: nn.Module, config: Dict) -> List:
+def setup_param_groups(model: nn.Module, config: dict) -> list:
+    """ Setup model parameters
+    args:
+        model: pytorch model
+        config: configuration containing params
+    returns:
+        list with model parameters
+    """
     return [{'params': model.parameters(), **config}]
 
 
-def resume_checkpoint(resume_path, model, optimizer, config):
+def resume_checkpoint(resume_path: str, model: nn.Module, optimizer: module_optimizer, config: dict) -> nn.Module, module_optimizer, int:
     """
     Resume from saved checkpoint.
     """
@@ -141,26 +154,15 @@ def resume_checkpoint(resume_path, model, optimizer, config):
     return model, optimizer, checkpoint['epoch']
 
 
-def get_instance(
-    module: ModuleType,
-    name: str,
-    config: Dict,
-    *args: Any
-) -> Any:
-    """
-    Helper to construct an instance of a class.
-
-    Parameters
-    ----------
-    module : ModuleType
-        Module containing the class to construct.
-    name : str
-        Name of class, as would be returned by ``.__class__.__name__``.
-    config : dict
-        Dictionary containing an 'args' item, which will be used as ``kwargs`` to construct the
-        class instance.
-    args : Any
-        Positional arguments to be given before ``kwargs`` in ``config``.
+def get_instance( module: ModuleType, name: str, config: Dict, *args: Any) -> Any:
+    """ Helper to construct an instance of a class.
+    args
+        module: Module containing the class to construct.
+        name: Name of class, as would be returned by ``.__class__.__name__``.
+        config: Dictionary containing an 'args' item, which will be used as ``kwargs`` to construct the class instance.
+        *args : Positional arguments to be given before ``kwargs`` in ``config``.
+    returns:
+        any instance of a class
     """
 
     ctor_name = config[name]['type']
@@ -172,7 +174,11 @@ def get_instance(
     return getattr(module, ctor_name)(*args, **config[name]['args'])
 
 
-def seed_everything(seed: int) -> None:
+def seed_everything(seed: int):
+    """ Sets a seed on python, numpy and pytorch
+    args:
+        seed: number of the seed
+    """
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)

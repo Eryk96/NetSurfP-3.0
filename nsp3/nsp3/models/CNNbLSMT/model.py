@@ -12,7 +12,7 @@ log = setup_logger(__name__)
 
 class CNNbLSTM(ModelBase):
     def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers):
-        """ Initializes the model with the required layers
+        """ Initialization of the CNNbLSTM model
         Args:
             init_n_channels [int]: size of the incoming feature vector
             out_channels [int]: amount of hidden neurons in the bidirectional lstm

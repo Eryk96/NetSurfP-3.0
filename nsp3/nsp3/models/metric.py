@@ -1,7 +1,18 @@
 import torch
 import numpy as np
 
-def get_mask(labels, use_disorder_mask=False, use_unknown_mask=False):
+
+def get_mask(labels: torch.tensor, use_disorder_mask: bool = False, use_unknown_mask: bool = False) -> torch.tensor:
+    """ Gets the mask from the labels
+
+    Args:
+        labels: tensor containing labels
+        use_disorder_mask: apply disorder mask
+        use_unknown_mask: apply unknown nucleotide mask
+
+    Returns:
+        The mask from the labels
+    """
     evaluation_mask = labels[:, :, 2]
     zero_mask = labels[:, :, 0] * evaluation_mask
     disorder_mask = labels[:, :, 1]
@@ -14,171 +25,237 @@ def get_mask(labels, use_disorder_mask=False, use_unknown_mask=False):
 
     return zero_mask
 
-def dihedral_to_radians(angle):
+
+def dihedral_to_radians(angle: torch.tensor) -> torch.tensor:
     """ Converts angles to radians
-    Args:
-        angles (1D Tensor): vector with angle values
-    """
-    return angle*np.pi/180
     
-def arctan_dihedral(sin, cos):
+    Args:
+        angles: tensor containing angle values
+    
+    Returns:
+        the angles to radians
+    """
+    return angle * np.pi / 180
+
+
+def arctan_dihedral(sin: torch.tensor, cos: torch.tensor) -> torch.tensor:
     """ Converts sin and cos back to diheral angles
+
     Args:
-        sin (1D Tensor): vector with sin values 
-        cos (1D Tensor): vector with cos values
-    """
-    result = torch.where(cos >= 0, torch.arctan(sin/cos), torch.arctan(sin/cos)+np.pi)
-    result = torch.where((sin <= 0) & (cos <= 0), result-np.pi*2, result)
+        sin: tensor with sin values 
+        cos: tensor with cos values
     
-    return result*180/np.pi
+    Returns:
+        cos and sin to angles
+    """
+    result = torch.where(cos >= 0, torch.arctan(sin / cos),
+                         torch.arctan(sin / cos) + np.pi)
+    result = torch.where((sin <= 0) & (cos <= 0), result - np.pi * 2, result)
+
+    return result * 180 / np.pi
 
 
-def fpr(pred, labels):
+def fpr(pred: torch.tensor, labels: torch.tensor) -> float:
     """ False positive rate
+
     Args:
-        inputs (1D Tensor): vector with predicted binary numeric values
-        labels (1D Tensor): vector with correct binary numeric values
+        inputs: tensor with binary values
+        labels: tensor with binary values
     """
     fp = sum((pred == 1) & (labels == 0))
     tn = sum((pred == 0) & (labels == 0))
-    
-    return (fp/(fp+tn)).item()
+
+    return (fp / (fp + tn)).item()
 
 
-def fnr(pred, labels):
+def fnr(pred: torch.tensor, labels: torch.tensor) -> float:
     """ False negative rate
+
     Args:
-        inputs (1D Tensor): vector with predicted binary numeric values
-        labels (1D Tensor): vector with correct binary numeric values
+        inputs: tensor with binary values
+        labels: tensor with binary values
     """
     fn = sum((pred == 0) & (labels == 1))
     tp = sum((pred == 1) & (labels == 1))
-    
-    return (fn/(fn+tp)).item()
+
+    return (fn / (fn + tp)).item()
 
 
-def mcc(pred, labels):
+def mcc(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Mathews correlation coefficient
+
     Args:
-        inputs (1D Tensor): vector with predicted binary numeric values
-        labels (1D Tensor): vector with correct binary numeric values
+        inputs: tensor with binary values
+        labels: tensor with binary values
     """
     fp = sum((pred == 1) & (labels == 0))
     tp = sum((pred == 1) & (labels == 1))
     fn = sum((pred == 0) & (labels == 1))
     tn = sum((pred == 0) & (labels == 0))
-    
-    return ((tp*tn-fp*fn)/torch.sqrt(((tp+fp)*(fn+tn)*(tp+fn)*(fp+tn)).float())).item()
+
+    return ((tp * tn - fp * fn) / torch.sqrt(((tp + fp) * (fn + tn) * (tp + fn) * (fp + tn)).float())).item()
 
 
-def pcc(pred, labels):
+def pcc(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Pearson correlation coefficient
+
     Args:
-        inputs (1D Tensor): vector with predicted numeric values
-        labels (1D Tensor): vector with correct numeric values
+        inputs: tensor with predicted values
+        labels: tensor with correct values
     """
     x = pred - torch.mean(pred)
     y = labels - torch.mean(labels)
-    
+
     return (torch.sum(x * y) / (torch.sqrt(torch.sum(x ** 2)) * torch.sqrt(torch.sum(y ** 2)))).item()
 
 
-def mae(pred, labels):
+def mae(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Mean absolute error
+
     Args:
-        inputs (1D Tensor): vector with predicted numeric values
-        labels (1D Tensor): vector with correct numeric values
+        inputs: tensor with predicted values
+        labels: tensor with correct values
     """
     err = torch.abs(labels - pred)
-    return torch.mean(torch.fmin(err, 360-err)).item()
+    return torch.mean(torch.fmin(err, 360 - err)).item()
 
 
-def accuracy(pred, labels):
-    """ Accuracy coefficient
+def accuracy(pred: torch.tensor, labels: torch.tensor) -> float:
+    """ Accuracy
     Args:
-        inputs (1D Tensor): vector with predicted integer values
-        labels (1D Tensor): vector with correct integer values
+        inputs: tensor with predicted values
+        labels: tensor with correct values
     """
-    
+
     return (sum((pred == labels)) / len(labels)).item()
 
-def metric_ss8(outputs, labels):
+
+def metric_ss8(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ SS8 metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels)
 
     labels = torch.argmax(labels[:, :, 7:15], dim=2)[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
-        
-    return accuracy(outputs, labels)
-    
 
-def metric_ss3(outputs, labels):
+    return accuracy(outputs, labels)
+
+
+def metric_ss3(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ SS3 metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels)
 
-    structure_mask = torch.tensor([0,0,0,1,1,2,2,2]).to(labels.device)
+    structure_mask = torch.tensor([0, 0, 0, 1, 1, 2, 2, 2]).to(labels.device)
 
     labels = torch.max(labels[:, :, 7:15] * structure_mask, dim=2)[0].long()[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
-        
+
     return accuracy(outputs, labels)
 
 
-def metric_dis_mcc(outputs, labels):
+def metric_dis_mcc(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ Mathews correlation coefficient disorder metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
+
     mask = get_mask(labels)
 
     labels = labels[:, :, 1].unsqueeze(2)
-    labels = torch.argmax(torch.cat([labels, 1-labels], dim=2), dim=2)[mask == 1]
+    labels = torch.argmax(torch.cat([labels, 1 - labels], dim=2), dim=2)[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
 
     return mcc(outputs, labels)
 
 
-def metric_dis_fpr(outputs, labels):
+def metric_dis_fpr(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ False positive rate disorder metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels)
 
     labels = labels[:, :, 1].unsqueeze(2)
-    labels = torch.argmax(torch.cat([labels, 1-labels], dim=2), dim=2)[mask == 1]
+    labels = torch.argmax(torch.cat([labels, 1 - labels], dim=2), dim=2)[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
 
     return fpr(outputs, labels)
 
 
-def metric_rsa(outputs, labels):
+def metric_rsa(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ Relative surface accesibility metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 5].unsqueeze(2)[mask == 1]
     outputs = outputs[mask == 1]
-        
+
     return pcc(outputs, labels)
 
 
-def metric_asa(outputs, labels):
+def metric_asa(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ Absolute surface accesibility metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     outputs = (outputs * labels[:, :, 17].unsqueeze(2))[mask == 1]
     labels = labels[:, :, 3].unsqueeze(2)[mask == 1]
-    
+
     return pcc(outputs, labels)
 
 
-def metric_phi(outputs, labels):    
+def metric_phi(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ Phi angle metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 15]
     mask = mask * (labels != 360).int()
     labels = labels[mask == 1]
-    
-    outputs = arctan_dihedral(outputs[:, :, 0], outputs[:, :, 1])[mask == 1]
-    
-    return mae(outputs, labels)
-    
 
-def metric_psi(outputs, labels):
+    outputs = arctan_dihedral(outputs[:, :, 0], outputs[:, :, 1])[mask == 1]
+
+    return mae(outputs, labels)
+
+
+def metric_psi(outputs, labels) -> float:
+    """ Psi angle metric
+
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
     mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
 
     labels = labels[:, :, 16]
     mask = mask * (labels != 360).int()
     labels = labels[mask == 1]
-    
+
     outputs = arctan_dihedral(outputs[:, :, 0], outputs[:, :, 1])[mask == 1]
-    
+
     return mae(outputs, labels)
