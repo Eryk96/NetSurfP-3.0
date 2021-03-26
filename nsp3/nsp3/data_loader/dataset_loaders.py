@@ -35,4 +35,5 @@ class NSPOnlyEmbeddingData(DatasetBaseHdf5):
         Args:
             index: Index at the array
         """
-        return self.X[index, :, 68:], self.y[index], self.lengths[index]
+        X = torch.nan_to_num(torch.tensor(self.X[index, :, 68:]).float())
+        return X, self.y[index], self.lengths[index]

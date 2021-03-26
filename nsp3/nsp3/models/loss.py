@@ -154,3 +154,23 @@ def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor
     loss = torch.stack([_ss8, _ss3, _dis, _rsa, _phi, _psi])
 
     return loss.sum()
+
+def secondary_structure_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+    """ Returns a weighted double task loss for secondary structure. 
+
+    Args:
+        outputs: tensor with psi predictions
+        labels: tensor with labels
+    """
+    # filters
+    zero_mask = labels[:, :, 0]
+    disorder_mask = labels[:, :, 1]
+    unknown_mask = labels[:, :, -1]
+
+    # weighted losses
+    _ss8 = ss8(outputs[0], labels) * 1
+    _ss3 = ss3(outputs[1], labels) * 5
+
+    loss = torch.stack([_ss8, _ss3])
+
+    return loss.sum()

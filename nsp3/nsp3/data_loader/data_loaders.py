@@ -1,29 +1,31 @@
 import numpy as np
+import nsp3.data_loader as module_dataset
 
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
 from nsp3.base import DataLoaderBase
-from nsp3.data_loader.dataset_loaders import NSPData
 
 
 class NSPDataLoader(DataLoaderBase):
     """ NSPDataLoader to load NetSurfP training data """
 
-    def __init__(self, train_path: str, batch_size: int, shuffle: bool, validation_split: float,
+    def __init__(self, train_path: str, dataset_loader: str, batch_size: int, shuffle: bool, validation_split: float,
                     nworkers: int, test_path: str = None):
         """ Constructor
         Args:
             train_path: path to the training dataset
+            dataset_loader: dataset loader class
             batch_size: size of the batch
             shuffle: shuffles the data (only if validation data is not created)
             validation_split: decimal for the split of the validation
             nworkers: workers for the dataloader class
             test_path: path to the test dataset(s)
         """
+        self.dataset_loader = getattr(module_dataset, dataset_loader)
 
-        self.train_dataset = NSPData(train_path[0])
-        self.valid_dataset = NSPData(train_path[0])
+        self.train_dataset = self.dataset_loader(train_path[0])
+        self.valid_dataset = self.dataset_loader(train_path[0])
 
         self.train_sampler = None
         self.valid_sampler = None
@@ -78,5 +80,5 @@ class NSPDataLoader(DataLoaderBase):
 
         test_data = []
         for path in self.test_path:
-            test_data.append((path, DataLoader(NSPData(path), **self.init_kwargs)))
+            test_data.append((path, DataLoader(self.dataset_loader(path), **self.init_kwargs)))
         return test_data

@@ -24,9 +24,8 @@ class DatasetBase(Dataset):
 
     def add_unknown_nucleotide_mask(self):
         """ Augments the target with a unknown nucleotide mask by finding entries that don't have any residue"""
-
         # creates a mask based on the one hot encoding
-        unknown_nucleotides = torch.max(self.X[:, :, :20], dim=2)
+        unknown_nucleotides = torch.max(torch.tensor(self.X[:, :, :20]), dim=2)
         unknown_nucleotides = unknown_nucleotides[0].unsqueeze(2)
 
         # merge the mask to first position of the targets
@@ -52,10 +51,9 @@ class DatasetBaseHdf5(DatasetBase):
         Args:
             path: file path for the dataset
         """
-
         self.file = h5py.File(path, "r")
         self.X = self.file["dataset"]
-        self.y = torch.tensor(self.X[:, :, 50:68])
+        self.y = torch.tensor(self.X[:, :, 50:68]).float()
         self.lengths = torch.tensor([sum(labels[:, 0] == 1) for labels in self.y])
 
         self.add_unknown_nucleotide_mask()
@@ -65,9 +63,9 @@ class DatasetBaseHdf5(DatasetBase):
         Args:
             index: Index at the array
         """
-        X = torch.cat([self.X[index, :, :50], self.X[index, :, 68:]], dim=2)
+        X = torch.cat([torch.tensor(self.X[index, :, :20]), torch.tensor(self.X[index, :, 68:])], dim=1).float()
 
-        return X, self.y[index], self.lengths[index]
+        return torch.nan_to_num(X), self.y[index], self.lengths[index]
         
     def close(self):
         self.file.close()

@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
@@ -100,9 +101,8 @@ class CNNTrans(ModelBase):
         # transformer encoder layers
         x = x.permute(0,2,1)
 
-        mask = pad_sequence(mask, batch_first=True, padding_value=0) == 1
         x = self.pos_enc(x)
-        x = self.transformer_encoder(x, src_key_padding_mask=mask)
+        x = self.transformer_encoder(x)
 
         # hidden neurons to classes
         ss8 = self.ss8(x)

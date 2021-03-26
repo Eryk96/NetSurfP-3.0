@@ -1,4 +1,4 @@
-name: CNNbLSTM
+name: CNNbLSTM_500
 save_dir: saved/nsp3/CNNbLSTM/
 seed: 1234
 target_devices: [0]
@@ -6,7 +6,7 @@ target_devices: [0]
 arch:
   type: CNNbLSTM
   args:
-    init_n_channels: 50
+    init_n_channels: 1280
     out_channels: 32
     cnn_layers: 2
     kernel_size: [129, 257]
@@ -18,8 +18,9 @@ arch:
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_S.npz]
+    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500_S.hdf5]
     test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
+    dataset_loader: NSPOnlyEmbeddingData
     batch_size: 15
     nworkers: 2
     shuffle: true
@@ -47,7 +48,7 @@ lr_scheduler:
   type: null
 
 training:
-  early_stop: 3
+  early_stop: 5
   epochs: 1
   monitor: min val_loss
   save_period: 1

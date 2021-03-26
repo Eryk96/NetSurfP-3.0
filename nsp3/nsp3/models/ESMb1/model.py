@@ -11,7 +11,7 @@ from nps3.embeddings import ESM1bEmbedding
 log = setup_logger(__name__)
 
 
-class CNNbLSTM(ModelBase):
+class ESM1b(ModelBase):
     def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers):
         """ Initializes the model with the required layers
         Args:
@@ -24,7 +24,7 @@ class CNNbLSTM(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(CNNbLSTM, self).__init__()
+        super(ESM1b, self).__init__()
 
         self.embedding = ESM1bEmbedding("../../models/esm1b_t33_650M_UR50S.pt")
 
@@ -54,10 +54,14 @@ class CNNbLSTM(ModelBase):
         log.info(f'<init>: \n{self}')
         
     def forward(self, x, mask):
-        max_length = x.size(1)
+        x = self.embedding(x)
 
         # hidden neurons to classes
         ss8 = self.ss8(x)
         ss3 = self.ss3(x)
+        dis = self.disorder(x)
+        rsa = self.rsa(x)
+        phi = self.phi(x)
+        psi = self.psi(x)
 
         return [ss8, ss3]

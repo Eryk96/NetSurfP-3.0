@@ -10,7 +10,7 @@ from nsp3.utils import setup_logger
 log = setup_logger(__name__)
 
 
-class CNNbLSTM(ModelBase):
+class CNNbLSTM_SS(ModelBase):
     def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers):
         """ Initializes the model with the required layers
         Args:
@@ -23,7 +23,7 @@ class CNNbLSTM(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(CNNbLSTM, self).__init__()
+        super(CNNbLSTM_SS, self).__init__()
 
         # CNN blocks
         self.conv = nn.ModuleList()
