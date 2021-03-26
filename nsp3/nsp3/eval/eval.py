@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import numpy as np
 
 from torch.utils.data import DataLoader
@@ -7,7 +8,7 @@ from nsp3.base import EvaluateBase, AverageMeter
 class Evaluate(EvaluateBase):
     """ Responsible for test evaluation and the metrics. """
     def __init__(self, model: nn.Module, metrics: list, metrics_task: list, device: torch.device,
-            test_data_loader: List[DataLoader], checkpoint_dir: str, writer_dir: str):
+            test_data_loader: list, checkpoint_dir: str, writer_dir: str):
         super().__init__(model, metrics, metrics_task, checkpoint_dir, writer_dir, device)
         """ Constructor
         Args:

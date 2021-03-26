@@ -51,7 +51,7 @@ def train(cfg: Dict, resume: str):
 
     log.info('Getting loss and metric function handles')
     loss = getattr(module_loss, cfg['loss'])
-    
+
     metrics = [getattr(module_metric, met) for met, _ in cfg['metrics'].items()]
     metrics_task = [task for _, task in cfg['metrics'].items()]
 
@@ -67,7 +67,7 @@ def train(cfg: Dict, resume: str):
     trainer.train()
 
     log.info('Initialising evaluation')
-    
+
     for _test_data_loader in test_data_loader:
         evaluation = Evaluate(model, metrics, metrics_task,
                                 device=device,
@@ -79,7 +79,7 @@ def train(cfg: Dict, resume: str):
     log.info('Finished!')
 
 
-def setup_device( model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
+def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
     """ Setup GPU device if available, move model into configured device
     args:
         model: Module to move to GPU
@@ -132,7 +132,8 @@ def setup_param_groups(model: nn.Module, config: dict) -> list:
     return [{'params': model.parameters(), **config}]
 
 
-def resume_checkpoint(resume_path: str, model: nn.Module, optimizer: module_optimizer, config: dict) -> nn.Module, module_optimizer, int:
+def resume_checkpoint(resume_path: str, model: nn.Module, 
+    optimizer: module_optimizer, config: dict) -> (nn.Module, module_optimizer, int):
     """
     Resume from saved checkpoint.
     """
@@ -154,7 +155,7 @@ def resume_checkpoint(resume_path: str, model: nn.Module, optimizer: module_opti
     return model, optimizer, checkpoint['epoch']
 
 
-def get_instance( module: ModuleType, name: str, config: Dict, *args: Any) -> Any:
+def get_instance(module: ModuleType, name: str, config: Dict, *args: Any) -> Any:
     """ Helper to construct an instance of a class.
     args
         module: Module containing the class to construct.

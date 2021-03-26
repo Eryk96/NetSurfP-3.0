@@ -1,5 +1,5 @@
-name: NetsurfP2_CNNbLSTM_HHBlits
-save_dir: saved/NetsurfP2_CNNbLSTM_HHBlits/
+name: CNNbLSTM_MMseqs
+save_dir: saved/baseline/
 seed: 1234
 target_devices: [0]
 
@@ -11,17 +11,17 @@ arch:
     cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
-    n_hidden: 50
+    n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
 
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp2/training_data/Train_HHblits_small.npz]
-    test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
-                ../data/nsp2/training_data/CB513_HHblits.npz, 
-                ../data/nsp2/training_data/TS115_HHblits.npz]
+    train_path: [../data/nsp2/training_data/Train_MMseqs.npz]
+    test_path: [../data/nsp2/training_data/CASP12_MMseqs.npz, 
+                ../data/nsp2/training_data/CB513_MMseqs.npz, 
+                ../data/nsp2/training_data/TS115_MMseqs.npz]
     batch_size: 15
     nworkers: 2
     shuffle: true
@@ -49,8 +49,8 @@ lr_scheduler:
   type: null
 
 training:
-  early_stop: 3
-  epochs: 1
+  early_stop: 5
+  epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true

@@ -1,4 +1,5 @@
 import numpy as np
+
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
@@ -72,7 +73,7 @@ class NSPDataLoader(DataLoaderBase):
         else:
             return DataLoader(self.valid_dataset, sampler=self.valid_sampler, **self.init_kwargs)
 
-    def get_test(self) -> List[DataLoader]:
+    def get_test(self) -> list:
         """ Returns the test data """
 
         test_data = []

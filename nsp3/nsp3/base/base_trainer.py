@@ -3,6 +3,7 @@ import math
 
 import yaml
 import torch
+import torch.nn as nn
 import torch.optim as optim
 
 from nsp3.utils import (
@@ -18,7 +19,7 @@ log = setup_logger(__name__)
 class TrainerBase:
     """ Base class for all trainers """
 
-    def __init__(self, model: nn.Module, loss: Any, metrics: dict, metrics_task: dict,
+    def __init__(self, model: nn.Module, loss: any, metrics: dict, metrics_task: dict,
                 optimizer: optim, start_epoch: int, config: dict, device: torch.device):
         """ Constructor
         Args:
@@ -151,7 +152,7 @@ class TrainerBase:
 
 class AverageMeter:
     """ Computes and stores the average and current value. """
-    
+
     def __init__(self, name):
         self.name = name
         self.reset()

@@ -1,0 +1,54 @@
+name: CNNbLSTM
+save_dir: saved/nsp3/CNNbLSTM/
+seed: 1234
+target_devices: [0]
+
+arch:
+  type: CNNbLSTM
+  args:
+    init_n_channels: 50
+    out_channels: 32
+    cnn_layers: 2
+    kernel_size: [129, 257]
+    padding: [64, 128]
+    n_hidden: 50
+    dropout: 0.5
+    lstm_layers: 2
+
+data_loader:
+  type: NSPDataLoader
+  args:
+    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_S.npz]
+    test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
+    batch_size: 15
+    nworkers: 2
+    shuffle: true
+    validation_split: 0.05
+
+loss: multi_task_loss
+
+metrics:
+  metric_ss8: 0
+  metric_ss3: 1
+  metric_dis_mcc: 2
+  metric_dis_fpr: 2
+  metric_rsa: 3
+  metric_asa: 3
+  metric_phi: 4
+  metric_psi: 5
+
+optimizer:
+  type: Adam
+  args:
+    lr: 0.0005
+    weight_decay: 0
+
+lr_scheduler: 
+  type: null
+
+training:
+  early_stop: 3
+  epochs: 1
+  monitor: min val_loss
+  save_period: 1
+  tensorboard: true
