@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
@@ -50,11 +49,9 @@ class ESM1b(ModelBase):
         log.info(f'<init>: \n{self}')
 
     def forward(self, x, mask):
-        padding_length = x.shape[1]
         x = decode_to_protein_sequence(x.cpu().numpy())
 
         x = self.embedding(x)
-        x = F.pad(x, pad=(0, 0, padding_length-x.shape[1], 0), mode='constant', value=0)
 
         # hidden neurons to classes
         ss8 = self.ss8(x)

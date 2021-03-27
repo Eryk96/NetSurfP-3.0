@@ -1,5 +1,5 @@
 import numpy as np
-import nsp3.data_loader as module_dataset
+import nsp3.data_loader.dataset_loaders as module_dataset
 
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
