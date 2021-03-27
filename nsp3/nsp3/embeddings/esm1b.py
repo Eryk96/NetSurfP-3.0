@@ -75,6 +75,8 @@ class ESM1bEmbedding(nn.Module):
 
         # configure pre-trained model
         self.model, alphabet = esm.pretrained.load_model_and_alphabet_local(model_path)
+        self.model.train()
+        
         self.batch_converter = alphabet.get_batch_converter()
 
         self.max_embedding = max_embedding
@@ -90,21 +92,21 @@ class ESM1bEmbedding(nn.Module):
         # if size below 1024 then generate embeddings and return
         if batch_residues <= self.max_embedding:
             embedding = self.model(batch_tokens, repr_layers=[33])[
-                                   "representations"][33].cpu()
+                                   "representations"][33]
             del batch_tokens
-            return embedding.detach().numpy()
+            return embedding
         else:
             # if size above 1024 then generate embeddings that overlaps with the offset
             embedding = self.model(batch_tokens[:, :self.max_embedding], repr_layers=[33])[
-                                   "representations"][33].cpu()
+                                   "representations"][33]
             for i in range(1, math.floor(batch_residues / self.max_embedding) + 1):
                 o1 = (self.max_embedding - self.offset) * i
                 o2 = o1 + self.max_embedding
                 embedding = torch.cat([embedding[:, :o1], self.model(
-                    batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33].cpu()], dim=1)
+                    batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33]], dim=1)
 
             del batch_tokens
-            return embedding.detach().numpy()
+            return embedding
 
 
 if __name__ == '__main__':
@@ -164,7 +166,7 @@ if __name__ == '__main__':
 
                     # store embedding model
                     embedding_model = model(
-                        decoded_sequences[i + j:i + j + mini_batch - offset])
+                        decoded_sequences[i + j:i + j + mini_batch - offset]).cpu().detach().numpy()
 
                     # store embedding without the extra start and end token
                     embedding_residues = embedding_model.shape[1]

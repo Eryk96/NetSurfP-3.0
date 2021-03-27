@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from nsp3.base import DatasetBase, DatasetBaseHdf5
 
 
@@ -15,6 +16,14 @@ class NSPDataOnlyEncoding(DatasetBase):
     def __init__(self, *args, **kwargs):
         super(NSPDataOnlyEncoding, self).__init__(*args, **kwargs)
         self.X = self.X[:, :, :20]
+
+
+class NSPDataSequence(DatasetBase):
+    """ NetsurfP 2.0 dataset .npz file with AA sequences instead of sparse encoding"""
+
+    def __init__(self, *args, **kwargs):
+        super(NSPDataSequence, self).__init__(*args, **kwargs)
+        self.X = torch.cat([self.X, self.y[:, :, 0].unsqueeze(2)], dim=2)
 
 
 class NSPEmbeddingData(DatasetBaseHdf5):

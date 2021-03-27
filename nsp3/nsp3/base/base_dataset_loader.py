@@ -25,7 +25,12 @@ class DatasetBase(Dataset):
     def add_unknown_nucleotide_mask(self):
         """ Augments the target with a unknown nucleotide mask by finding entries that don't have any residue"""
         # creates a mask based on the one hot encoding
-        unknown_nucleotides = torch.max(torch.tensor(self.X[:, :, :20]), dim=2)
+        X = self.X[:, :, :20]
+
+        if type(X) != torch.tensor:
+            X = torch.tensor(X)
+
+        unknown_nucleotides = torch.max(X, dim=2)
         unknown_nucleotides = unknown_nucleotides[0].unsqueeze(2)
 
         # merge the mask to first position of the targets
