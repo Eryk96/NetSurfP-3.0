@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 import h5py
 import pdb
@@ -10,61 +11,34 @@ import argparse
 from numpy.core.defchararray import translate
 
 AA_TRANSLATE = {
-    "0": "X",
-    "1": "A",
-    "2": "C",
-    "3": "D",
-    "4": "E",
-    "5": "F",
-    "6": "G",
-    "7": "H",
-    "8": "I",
-    "9": "K",
-    "10": "L",
-    "11": "M",
-    "12": "N",
-    "13": "P",
-    "14": "Q",
-    "15": "R",
-    "16": "S",
-    "17": "T",
-    "18": "V",
-    "19": "W",
-    "20": "Y",
+    0: "X",
+    1: "A",
+    2: "C",
+    3: "D",
+    4: "E",
+    5: "F",
+    6: "G",
+    7: "H",
+    8: "I",
+    9: "K",
+    10: "L",
+    11: "M",
+    12: "N",
+    13: "P",
+    14: "Q",
+    15: "R",
+    16: "S",
+    17: "T",
+    18: "V",
+    19: "W",
+    20: "Y",
 }
-
-
-def decode_to_protein_sequence(data: np.array) -> tuple:
-    """ Converts the sparse amino acid encoding back to a protein sequences
-    
-    Args:
-        data: a numpy array that contains AA encoding data
-
-    Returns: 
-        sequence number and the protein sequence
-    """
-
-    sequences = []
-
-    data_sequences = data.shape[0]
-    for seq_id in range(data_sequences):
-        # Get the positions of the AA encodings
-        residues = ((np.argmax(data[seq_id, :, :20], axis=1) + 1)
-                    * np.amax(data[seq_id, :, :20], axis=1)).astype(int)
-
-        mask = (data[seq_id, :, 50] == 1)
-        residues = residues[mask].astype(str)
-        # Translate and store proteins
-        sequences.append(("protein_{}".format(str(seq_id)), "".join(
-            [AA_TRANSLATE.get(r, r) for r in residues])))
-
-    return sequences
 
 
 class ESM1bEmbedding(nn.Module):
     """ ESM1b embedding layer module """
 
-    def __init__(self, model_path: str, max_embedding: int = 1024, offset: int = 200):
+    def __init__(self, model_path: str, feature_extracting: bool, max_embedding: int = 1024, offset: int = 200):
         """ Constructor
         Args:
             model_path: path to language model
@@ -75,14 +49,34 @@ class ESM1bEmbedding(nn.Module):
 
         # configure pre-trained model
         self.model, alphabet = esm.pretrained.load_model_and_alphabet_local(model_path)
-        self.model.train()
-        
+
+        if feature_extracting:
+            for param in self.model.parameters():
+                param.requires_grad = False
+
         self.batch_converter = alphabet.get_batch_converter()
 
         self.max_embedding = max_embedding
         self.offset = offset
 
-    def forward(self, x: list) -> np.array:
+    def _decode_sparse_encoding(self, x: torch.tensor) -> list:
+        x = ((torch.argmax(x[:, :, :20], axis=2) + 1)
+             * torch.amax(x[:, :, :20], axis=2))
+
+        result = []
+        for i in range(len(x)):
+            name = "protein_" + str(i)
+            sequence = "".join([AA_TRANSLATE[r.item()] for r in x[i]])
+            import pdb
+            result.append((name, sequence.rstrip("X")))
+
+        return result
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        sequence_length = x.shape[1]
+
+        x = self._decode_sparse_encoding(x)
+
         # make tokens and move to cude if possible
         batch_labels, batch_strs, batch_tokens = self.batch_converter(x)
         device = (next(self.model.parameters()).device)
@@ -90,23 +84,28 @@ class ESM1bEmbedding(nn.Module):
         batch_sequences, batch_residues = batch_tokens.shape
 
         # if size below 1024 then generate embeddings and return
+        embedding = None
+
         if batch_residues <= self.max_embedding:
             embedding = self.model(batch_tokens, repr_layers=[33])[
                                    "representations"][33]
-            del batch_tokens
-            return embedding
         else:
             # if size above 1024 then generate embeddings that overlaps with the offset
             embedding = self.model(batch_tokens[:, :self.max_embedding], repr_layers=[33])[
                                    "representations"][33]
+                                   
             for i in range(1, math.floor(batch_residues / self.max_embedding) + 1):
                 o1 = (self.max_embedding - self.offset) * i
                 o2 = o1 + self.max_embedding
                 embedding = torch.cat([embedding[:, :o1], self.model(
                     batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33]], dim=1)
 
-            del batch_tokens
-            return embedding
+        embedding = F.pad(embedding, pad=(0, 0, sequence_length-embedding.shape[1], 0), mode='constant', value=0)    
+
+        del batch_tokens
+        torch.cuda.empty_cache()
+
+        return torch.nan_to_num(embedding)
 
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ arch:
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500_S.hdf5]
+    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500.hdf5]
     test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
     dataset_loader: NSPOnlyEmbeddingData
     batch_size: 15

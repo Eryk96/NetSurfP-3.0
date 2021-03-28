@@ -11,14 +11,14 @@ arch:
     cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
-    n_hidden: 50
+    n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
 
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500_S.hdf5]
+    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500.hdf5]
     test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
     dataset_loader: NSPOnlyEmbeddingData
     batch_size: 15

@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
@@ -8,21 +7,22 @@ from nsp3.base import ModelBase
 from nsp3.utils import setup_logger
 from nsp3.embeddings import ESM1bEmbedding
 
-from nsp3.embeddings import decode_to_protein_sequence
 
 log = setup_logger(__name__)
 
 
 class ESM1b(ModelBase):
-    def __init__(self, in_features: int, language_model: str):
+    def __init__(self, in_features: int, language_model: str, feature_extracting: bool = True):
         """ Initializes the model
         Args:
-            in_features [int]: size of the embedding features
+            in_features: size of the embedding features
             language_model: path to the language model weights
+            feature_extracting: finetune or do feature extraction from language model
         """
         super(ESM1b, self).__init__()
 
-        self.embedding = ESM1bEmbedding(language_model)
+        self.feature_extract = feature_extracting
+        self.embedding = ESM1bEmbedding(language_model, self.feature_extract)
 
         # Task block
         self.ss8 = nn.Sequential(*[
@@ -49,12 +49,21 @@ class ESM1b(ModelBase):
 
         log.info(f'<init>: \n{self}')
 
-    def forward(self, x, mask):
-        padding_length = x.shape[1]
-        x = decode_to_protein_sequence(x.cpu().numpy())
+    def parameters(self, recurse: bool = True) -> list:
+        print("Params to learn:")
+        if self.feature_extract:
+            for name,param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
+        else:
+            for name, param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
 
+    def forward(self, x, mask):
         x = self.embedding(x)
-        x = F.pad(x, pad=(0, 0, padding_length-x.shape[1], 0), mode='constant', value=0)
 
         # hidden neurons to classes
         ss8 = self.ss8(x)
