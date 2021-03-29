@@ -18,8 +18,8 @@ data_loader:
                 ../data/nsp2/training_data/CB513_HHblits.npz, 
                 ../data/nsp2/training_data/TS115_HHblits.npz]
     dataset_loader: NSPDataOnlyEncoding
-    batch_size: 2
-    nworkers: 2
+    batch_size: 15
+    nworkers: 4
     shuffle: true
     validation_split: 0.05
 
@@ -46,7 +46,7 @@ lr_scheduler:
 
 training:
   early_stop: 3
-  epochs: 1
+  epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true

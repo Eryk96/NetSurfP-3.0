@@ -23,7 +23,7 @@ class CNNbLSTM_ESM1b(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(CNNbLSTM_SS, self).__init__()
+        super(CNNbLSTM_ESM1b, self).__init__()
 
         # CNN blocks
         self.conv = nn.ModuleList()
