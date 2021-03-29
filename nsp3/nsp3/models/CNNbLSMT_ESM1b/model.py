@@ -5,13 +5,14 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from nsp3.base import ModelBase
 from nsp3.utils import setup_logger
+from nsp3.embeddings import ESM1bEmbedding
 
 
 log = setup_logger(__name__)
 
 
 class CNNbLSTM_ESM1b(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers):
+    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers, language_model, feature_extracting):
         """ Initializes the model with the required layers
         Args:
             init_n_channels [int]: size of the incoming feature vector
@@ -23,7 +24,9 @@ class CNNbLSTM_ESM1b(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(CNNbLSTM_SS, self).__init__()
+        super(CNNbLSTM_ESM1b, self).__init__()
+
+        self.embedding = ESM1bEmbedding(language_model, feature_extracting)
 
         # CNN blocks
         self.conv = nn.ModuleList()
@@ -54,8 +57,12 @@ class CNNbLSTM_ESM1b(ModelBase):
     def forward(self, x, mask):
         max_length = x.size(1)
 
+        x = self.embedding(x)
         # calculate the residuals
         x = x.permute(0,2,1)
+
+        import pdb
+        pdb.set_trace()
 
         # concatenate channels from residuals and input + batch norm
         r = x

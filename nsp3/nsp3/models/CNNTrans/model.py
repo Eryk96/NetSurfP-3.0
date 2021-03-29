@@ -5,6 +5,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 from nsp3.base import ModelBase
 from nsp3.utils import setup_logger
+from nsp3.embeddings import ESM1bEmbedding
 
 
 log = setup_logger(__name__)

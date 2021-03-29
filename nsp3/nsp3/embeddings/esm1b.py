@@ -100,7 +100,7 @@ class ESM1bEmbedding(nn.Module):
                 embedding = torch.cat([embedding[:, :o1], self.model(
                     batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33]], dim=1)
 
-        embedding = F.pad(embedding, pad=(0, 0, sequence_length-embedding.shape[1], 0), mode='constant', value=0)    
+        embedding = F.pad(embedding, pad=(0, 0, sequence_length-embedding.shape[1], 0), mode='constant', value=0)
 
         del batch_tokens
         torch.cuda.empty_cache()
