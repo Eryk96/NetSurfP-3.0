@@ -1,4 +1,4 @@
-name: CNNbLSTM_ESM1b_500
+name: CNNbLSTM_ESM1b_500_finetune
 save_dir: saved/nsp3/CNNbLSTM_ESM1b/
 seed: 1234
 target_devices: [0]
@@ -11,11 +11,11 @@ arch:
     cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
-    n_hidden: 10
+    n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
-    feature_extracting: false
+    feature_extract: false
 
 data_loader:
   type: NSPDataLoader
@@ -25,7 +25,7 @@ data_loader:
                 ../data/nsp2/training_data/CB513_HHblits.npz, 
                 ../data/nsp2/training_data/TS115_HHblits.npz]
     dataset_loader: NSPDataOnlyEncoding
-    batch_size: 1
+    batch_size: 5
     nworkers: 1
     shuffle: true
     validation_split: 0.05
@@ -47,7 +47,7 @@ lr_scheduler:
 
 training:
   early_stop: 5
-  epochs: 1
+  epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true

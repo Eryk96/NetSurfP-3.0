@@ -12,7 +12,7 @@ log = setup_logger(__name__)
 
 
 class CNNbLSTM_ESM1b(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers, language_model, feature_extracting):
+    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers, language_model, feature_extract):
         """ Initializes the model with the required layers
         Args:
             init_n_channels [int]: size of the incoming feature vector
@@ -26,7 +26,8 @@ class CNNbLSTM_ESM1b(ModelBase):
         """
         super(CNNbLSTM_ESM1b, self).__init__()
 
-        self.embedding = ESM1bEmbedding(language_model, feature_extracting)
+        self.feature_extract = feature_extract
+        self.embedding = ESM1bEmbedding(language_model, feature_extract)
 
         # CNN blocks
         self.conv = nn.ModuleList()
@@ -54,6 +55,19 @@ class CNNbLSTM_ESM1b(ModelBase):
 
         log.info(f'<init>: \n{self}')
         
+    def parameters(self, recurse: bool = True) -> list:
+        print("Params to learn:")
+        if self.feature_extract:
+            for name, param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
+        else:
+            for name, param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
+
     def forward(self, x, mask):
         max_length = x.size(1)
 

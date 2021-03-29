@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from nsp3.base import DatasetBase, DatasetBaseHdf5
+from nsp3.base import DatasetBase
 
 
 class NSPData(DatasetBase):

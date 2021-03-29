@@ -49,19 +49,6 @@ class ESM1b(ModelBase):
 
         log.info(f'<init>: \n{self}')
 
-    def parameters(self, recurse: bool = True) -> list:
-        print("Params to learn:")
-        if self.feature_extract:
-            for name,param in self.named_parameters(recurse=recurse):
-                if param.requires_grad == True:
-                    print("\t",name)
-                    yield param
-        else:
-            for name, param in self.named_parameters(recurse=recurse):
-                if param.requires_grad == True:
-                    print("\t",name)
-                    yield param
-
     def forward(self, x, mask):
         x = self.embedding(x)
 
