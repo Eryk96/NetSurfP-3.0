@@ -1,4 +1,4 @@
-name: CNNTrans_500
+name: Trans
 save_dir: saved/nsp3/CNNTrans/
 seed: 1234
 target_devices: [0]
@@ -7,8 +7,8 @@ arch:
   type: CNNTrans
   args:
     init_n_channels: 1280
-    out_channels: 32
-    cnn_layers: 2
+    out_channels: 0
+    cnn_layers: 0
     kernel_size: [129, 257]
     padding: [64, 128]
     n_head: 21
@@ -18,9 +18,11 @@ arch:
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500.hdf5]
-    test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
-    dataset_loader: NSPOnlyEmbeddingData
+    train_path: [../data/nsp2/training_data/Train_HHblits.npz]
+    test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
+                ../data/nsp2/training_data/CB513_HHblits.npz, 
+                ../data/nsp2/training_data/TS115_HHblits.npz]
+    dataset_loader: NSPDataOnlyEncoding
     batch_size: 15
     nworkers: 2
     shuffle: true
@@ -49,7 +51,7 @@ lr_scheduler:
 
 training:
   early_stop: 3
-  epochs: 1
+  epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true

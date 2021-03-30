@@ -8,8 +8,7 @@ arch:
   args:
     in_features: 1280
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
-    feature_extracting: true
-
+    
 data_loader:
   type: NSPDataLoader
   args:

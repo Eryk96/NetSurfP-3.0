@@ -12,7 +12,7 @@ log = setup_logger(__name__)
 
 
 class ESM1b(ModelBase):
-    def __init__(self, in_features: int, language_model: str, feature_extracting: bool = True):
+    def __init__(self, in_features: int, language_model: str, **kwargs):
         """ Initializes the model
         Args:
             in_features: size of the embedding features
@@ -21,8 +21,7 @@ class ESM1b(ModelBase):
         """
         super(ESM1b, self).__init__()
 
-        self.feature_extract = feature_extracting
-        self.embedding = ESM1bEmbedding(language_model, self.feature_extract)
+        self.embedding = ESM1bEmbedding(language_model, **kwargs)
 
         # Task block
         self.ss8 = nn.Sequential(*[

@@ -1,12 +1,12 @@
-name: CNNbLSTM_ESM1b_500
-save_dir: saved/nsp3/CNNbLSTM_ESM1b/
+name: CNNbLSTM_HHBlits
+save_dir: saved/baseline/
 seed: 1234
 target_devices: [0]
 
 arch:
-  type: CNNbLSTM_ESM1b
+  type: CNNbLSTM
   args:
-    init_n_channels: 1280
+    init_n_channels: 20
     out_channels: 32
     cnn_layers: 2
     kernel_size: [129, 257]
@@ -14,27 +14,31 @@ arch:
     n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
-    language_model: "../models/esm1b_t33_650M_UR50S.pt"
-    feature_extract: true
 
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp2/training_data/Train_HHblits_500.npz]
+    train_path: [../data/nsp2/training_data/Train_HHblits.npz]
     test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
                 ../data/nsp2/training_data/CB513_HHblits.npz, 
                 ../data/nsp2/training_data/TS115_HHblits.npz]
-    dataset_loader: NSPDataOnlyEncoding
+    dataset_loader: NSPData
     batch_size: 15
-    nworkers: 1
+    nworkers: 2
     shuffle: true
     validation_split: 0.05
 
-loss: secondary_structure_loss
+loss: multi_task_loss
 
 metrics:
   metric_ss8: 0
   metric_ss3: 1
+  metric_dis_mcc: 2
+  metric_dis_fpr: 2
+  metric_rsa: 3
+  metric_asa: 3
+  metric_phi: 4
+  metric_psi: 5
 
 optimizer:
   type: Adam
@@ -46,7 +50,7 @@ lr_scheduler:
   type: null
 
 training:
-  early_stop: 5
+  early_stop: 3
   epochs: 100
   monitor: min val_loss
   save_period: 1

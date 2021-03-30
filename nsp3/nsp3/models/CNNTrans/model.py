@@ -31,7 +31,7 @@ class PositionalEncoding(nn.Module):
 
 
 class CNNTrans(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_head, dropout, encoder_layers):
+    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_head, dropout, encoder_layers, language_model, **kwargs):
         """ Initializes the model with the required layers
         Args:
             init_n_channels [int]: size of the incoming feature vector
@@ -44,6 +44,8 @@ class CNNTrans(ModelBase):
             encoder_layers [int]: amount of encoder layers
         """
         super(CNNTrans, self).__init__()
+
+        self.embedding = ESM1bEmbedding(language_model, **kwargs)
 
         # CNN blocks
         self.conv = nn.ModuleList()
@@ -88,6 +90,8 @@ class CNNTrans(ModelBase):
         
     def forward(self, x, mask):
         max_length = x.size(1)
+
+        x = self.embedding(x)
 
         # calculate the residuals
         x = x.permute(0,2,1)

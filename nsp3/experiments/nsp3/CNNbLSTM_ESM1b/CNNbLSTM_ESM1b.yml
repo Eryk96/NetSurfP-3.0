@@ -1,42 +1,40 @@
-name: CNNbLSTM_500
-save_dir: saved/nsp3/CNNbLSTM/
+name: CNNbLSTM_ESM1b
+save_dir: saved/nsp3/CNNbLSTM_ESM1b/
 seed: 1234
 target_devices: [0]
 
 arch:
-  type: CNNbLSTM
+  type: CNNbLSTM_ESM1b
   args:
     init_n_channels: 1280
     out_channels: 32
     cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
-    n_hidden: 1024
+    n_hidden: 10
     dropout: 0.5
     lstm_layers: 2
+    language_model: "../models/esm1b_t33_650M_UR50S.pt"
+    ft_lm_head: true
 
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp3/training_data/Train_HHblits_ESM1b_500.hdf5]
-    test_path: [../data/nsp3/training_data/CASP12_HHblits_ESM1b.hdf5]
-    dataset_loader: NSPOnlyEmbeddingData
+    train_path: [../data/nsp2/training_data/Train_HHblits.npz]
+    test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
+                ../data/nsp2/training_data/CB513_HHblits.npz, 
+                ../data/nsp2/training_data/TS115_HHblits.npz]
+    dataset_loader: NSPDataOnlyEncoding
     batch_size: 15
-    nworkers: 2
+    nworkers: 1
     shuffle: true
     validation_split: 0.05
 
-loss: multi_task_loss
+loss: secondary_structure_loss
 
 metrics:
   metric_ss8: 0
   metric_ss3: 1
-  metric_dis_mcc: 2
-  metric_dis_fpr: 2
-  metric_rsa: 3
-  metric_asa: 3
-  metric_phi: 4
-  metric_psi: 5
 
 optimizer:
   type: Adam
@@ -49,7 +47,7 @@ lr_scheduler:
 
 training:
   early_stop: 5
-  epochs: 1
+  epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true
