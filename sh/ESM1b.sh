@@ -9,11 +9,11 @@
 #PBS -o log.log
 ### Only send mail when job is aborted or terminates abnormally
 ### Number of nodes
-#PBS -l nodes=1:ppn=8:gpus=1
+#PBS -l nodes=1:ppn=4:gpus=1
 ### Memory
-#PBS -l mem=32gb
+#PBS -l mem=16gb
 ### Requesting time - format is <days>:<hours>:<minutes>:<seconds>
-#PBS -l walltime=10:00:00
+#PBS -l walltime=06:00:00
   
 # Go to the directory from where the job was submitted (initial directory is $HOME)
 echo Working directory is $PBS_O_WORKDIR
@@ -47,4 +47,4 @@ cd ../nsp3
 python setup.py install
 
 nsp3 train -c experiments/nsp3/ESM1b/ESM1b.yml
-nsp3 train -c experiments/nsp3/ESM1b/ESM1b_finetune.yml
+#nsp3 train -c experiments/nsp3/ESM1b/ESM1b_finetune.yml

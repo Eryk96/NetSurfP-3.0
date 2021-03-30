@@ -1,14 +1,21 @@
-name: ESM1b_finetune
-save_dir: saved/nsp3/ESM1b/
+name: CNNbLSTM_ESM1b_finetune
+save_dir: saved/nsp3/CNNbLSTM_ESM1b/
 seed: 1234
-target_devices: []
+target_devices: [0]
 
 arch:
-  type: ESM1b
+  type: CNNbLSTM_ESM1b
   args:
-    in_features: 1300
+    init_n_channels: 1280
+    out_channels: 32
+    cnn_layers: 2
+    kernel_size: [129, 257]
+    padding: [64, 128]
+    n_hidden: 1024
+    dropout: 0.5
+    lstm_layers: 2
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
-    feature_extract: false
+    ft_lm_head: true
 
 data_loader:
   type: NSPDataLoader
@@ -23,17 +30,11 @@ data_loader:
     shuffle: true
     validation_split: 0.05
 
-loss: multi_task_loss
+loss: secondary_structure_loss
 
 metrics:
   metric_ss8: 0
   metric_ss3: 1
-  metric_dis_mcc: 2
-  metric_dis_fpr: 2
-  metric_rsa: 3
-  metric_asa: 3
-  metric_phi: 4
-  metric_psi: 5
 
 optimizer:
   type: Adam

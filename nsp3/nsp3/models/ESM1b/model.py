@@ -12,7 +12,7 @@ log = setup_logger(__name__)
 
 
 class ESM1b(ModelBase):
-    def __init__(self, in_features: int, language_model: str, feature_extracting: bool = True):
+    def __init__(self, in_features: int, language_model: str, feature_extract: bool = True):
         """ Initializes the model
         Args:
             in_features: size of the embedding features
@@ -21,7 +21,7 @@ class ESM1b(ModelBase):
         """
         super(ESM1b, self).__init__()
 
-        self.feature_extract = feature_extracting
+        self.feature_extract = feature_extract
         self.embedding = ESM1bEmbedding(language_model, self.feature_extract)
 
         # Task block
@@ -48,6 +48,19 @@ class ESM1b(ModelBase):
         ])
 
         log.info(f'<init>: \n{self}')
+
+    def parameters(self, recurse: bool = True) -> list:
+        print("Params to learn:")
+        if self.feature_extract:
+            for name, param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
+        else:
+            for name, param in self.named_parameters(recurse=recurse):
+                if param.requires_grad == True:
+                    print("\t",name)
+                    yield param
 
     def forward(self, x, mask):
         x = self.embedding(x)

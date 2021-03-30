@@ -46,5 +46,7 @@ cd ../nsp3
 
 python setup.py install
 
-nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b.yml
-nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b_500.yml
+#nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b.yml
+nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b_finetune.yml
+#nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b_500.yml
+#nsp3 train -c experiments/nsp3/CNNbLSTM_ESM1b/CNNbLSTM_ESM1b_500_finetune.yml
