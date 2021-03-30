@@ -11,18 +11,10 @@ arch:
     cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
-<<<<<<< HEAD
-    n_hidden: 10
-    dropout: 0.5
-    lstm_layers: 2
-    language_model: "../models/esm1b_t33_650M_UR50S.pt"
-    ft_lm_head: true
-=======
     n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
->>>>>>> 13c3a6a9dda1c2d9bf175cbfd44b7f126cdec174
 
 data_loader:
   type: NSPDataLoader
@@ -33,11 +25,7 @@ data_loader:
                 ../data/nsp2/training_data/TS115_HHblits.npz]
     dataset_loader: NSPDataOnlyEncoding
     batch_size: 15
-<<<<<<< HEAD
-    nworkers: 1
-=======
     nworkers: 2
->>>>>>> 13c3a6a9dda1c2d9bf175cbfd44b7f126cdec174
     shuffle: true
     validation_split: 0.05
 
@@ -57,16 +45,8 @@ lr_scheduler:
   type: null
 
 training:
-<<<<<<< HEAD
-  early_stop: 5
-  epochs: 100
-  monitor: min val_loss
-  save_period: 1
-  tensorboard: true
-=======
   early_stop: 3
   epochs: 100
   monitor: min val_loss
   save_period: 1
   tensorboard: true
->>>>>>> 13c3a6a9dda1c2d9bf175cbfd44b7f126cdec174

@@ -8,10 +8,6 @@ arch:
   args:
     in_features: 1300
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
-<<<<<<< HEAD
-=======
-    feature_extract: false
->>>>>>> 13c3a6a9dda1c2d9bf175cbfd44b7f126cdec174
 
 data_loader:
   type: NSPDataLoader

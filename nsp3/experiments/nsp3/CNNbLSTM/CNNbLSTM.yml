@@ -4,7 +4,7 @@ seed: 1234
 target_devices: [0]
 
 arch:
-  type: CNNbLSTM
+  type: CNNbLSTM_ESM1b_All
   args:
     init_n_channels: 1280
     out_channels: 32

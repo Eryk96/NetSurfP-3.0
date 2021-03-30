@@ -7,8 +7,8 @@ arch:
   type: CNNTrans
   args:
     init_n_channels: 1280
-    out_channels: 0
-    cnn_layers: 0
+    out_channels: 32
+    cnn_layers: 2
     kernel_size: [129, 257]
     padding: [64, 128]
     n_head: 21

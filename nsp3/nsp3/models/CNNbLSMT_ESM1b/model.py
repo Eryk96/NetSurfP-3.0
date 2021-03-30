@@ -146,6 +146,13 @@ class CNNbLSTM_ESM1b_All(ModelBase):
         ])
 
         log.info(f'<init>: \n{self}')
+
+    def parameters(self, recurse: bool = True) -> list:
+        log.info("Params to learn:")
+        for name, param in self.named_parameters(recurse=recurse):
+            if param.requires_grad == True:
+                log.info("\t" + name)
+                yield param
         
     def forward(self, x, mask):
         max_length = x.size(1)
