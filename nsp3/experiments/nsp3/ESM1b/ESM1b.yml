@@ -6,13 +6,13 @@ target_devices: [0]
 arch:
   type: ESM1b
   args:
-    in_features: 1280
+    in_features: 1300
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
     
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp2/training_data/Train_HHblits.npz]
+    train_path: [../data/nsp2/training_data/Train_HHblits_500_small.npz]
     test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
                 ../data/nsp2/training_data/CB513_HHblits.npz, 
                 ../data/nsp2/training_data/TS115_HHblits.npz]
