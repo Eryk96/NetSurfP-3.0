@@ -3,7 +3,7 @@
 ### Account information
 #PBS -W group_list=ht3_aim -A ht3_aim
 ### Job name (comment out the next line to get the name of the script used as the job name)
-#PBS -N nsp3_CNNbLSTM
+#PBS -N CNNbLSTM
 ### Output files (comment out the next 2 lines to get the job name used instead)
 #PBS -e CNNbLSTM.err
 #PBS -o CNNbLSTM.log
@@ -46,5 +46,7 @@ cd ../nsp3
 
 python setup.py install
 
-nsp3 train -c experiments/baseline/CNNbLSTM_HHblits.yml
-nsp3 train -c experiments/baseline/CNNbLSTM_MMseqs.yml
+#nsp3 train -c experiments/baseline/CNNbLSTM_HHblits.yml
+#nsp3 train -c experiments/baseline/CNNbLSTM_MMseqs.yml
+nsp3 train -c experiments/baseline/CNNbLSTM_HHblits_encoding.yml
+nsp3 train -c experiments/baseline/CNNbLSTM_MMseqs_encoding.yml

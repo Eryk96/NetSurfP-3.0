@@ -46,5 +46,5 @@ cd ../nsp3
 
 python setup.py install
 
-nsp3 train -c experiments/nsp3/ESM1b/ESM1b.yml
-#nsp3 train -c experiments/nsp3/ESM1b/ESM1b_finetune.yml
+#nsp3 train -c experiments/nsp3/ESM1b/ESM1b.yml
+nsp3 train -c experiments/nsp3/ESM1b/ESM1b_finetune.yml

@@ -47,4 +47,4 @@ cd ../nsp3
 python setup.py install
 
 nsp3 train -c experiments/nsp3/CNNbLSTM/CNNbLSTM.yml
-nsp3 train -c experiments/nsp3/CNNbLSTM/CNNbLSTM_500.yml
+#nsp3 train -c experiments/nsp3/CNNbLSTM/CNNbLSTM_500.yml
