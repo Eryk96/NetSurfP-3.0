@@ -14,6 +14,7 @@ arch:
     n_hidden: 1024
     dropout: 0.5
     lstm_layers: 2
+    language_model: "../models/esm1b_t33_650M_UR50S.pt"
 
 data_loader:
   type: NSPDataLoader

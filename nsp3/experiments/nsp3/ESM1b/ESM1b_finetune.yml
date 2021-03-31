@@ -8,6 +8,7 @@ arch:
   args:
     in_features: 1300
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
+    ft_transformer: true
 
 data_loader:
   type: NSPDataLoader
