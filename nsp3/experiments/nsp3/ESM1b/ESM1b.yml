@@ -6,7 +6,7 @@ target_devices: [0]
 arch:
   type: ESM1b
   args:
-    in_features: 1300
+    in_features: 1280
     language_model: "../models/esm1b_t33_650M_UR50S.pt"
     
 data_loader:

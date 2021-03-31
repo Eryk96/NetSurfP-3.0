@@ -13,7 +13,7 @@
 ### Memory
 #PBS -l mem=16gb
 ### Requesting time - format is <days>:<hours>:<minutes>:<seconds>
-#PBS -l walltime=06:00:00
+#PBS -l walltime=08:00:00
   
 # Go to the directory from where the job was submitted (initial directory is $HOME)
 echo Working directory is $PBS_O_WORKDIR
@@ -46,6 +46,7 @@ cd ../nsp3
 
 python setup.py install
 
-nsp3 train -c experiments/nsp3/CNNTrans/CNNTrans.yml
-nsp3 train -c experiments/nsp3/CNNTrans/CNNTrans_500.yml
+nsp3 train -c experiments/nsp3/CNNTrans/CNNTrans.yml -r /home/projects/ht3_aim/people/erikie/NSPThesis/nsp3/saved/nsp3/CNNTrans/CNNTrans/0330-202957/checkpoints/checkpoint-epoch12.pth
+nsp3 train -c experiments/nsp3/CNNTrans/Trans.yml
+#nsp3 train -c experiments/nsp3/CNNTrans/CNNTrans_500.yml
 

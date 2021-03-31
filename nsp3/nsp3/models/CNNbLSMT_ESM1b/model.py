@@ -102,7 +102,7 @@ class CNNbLSTM_ESM1b_All(ModelBase):
             dropout [float]: amount of dropout
             lstm_layers [int]: amount of bidirectional lstm layers
         """
-        super(CNNbLSTM, self).__init__()
+        super(CNNbLSTM_ESM1b_All, self).__init__()
 
         self.embedding = ESM1bEmbedding(language_model, **kwargs)
 
