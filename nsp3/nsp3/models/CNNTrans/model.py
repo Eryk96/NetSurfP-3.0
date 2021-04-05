@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
 
+import math
+
 from nsp3.base import ModelBase
 from nsp3.utils import setup_logger
 from nsp3.embeddings import ESM1bEmbedding
@@ -11,9 +13,16 @@ from nsp3.embeddings import ESM1bEmbedding
 log = setup_logger(__name__)
 
 # from https://pytorch.org/tutorials/beginner/transformer_tutorial.html
-import math
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=5000):
+    """ Injects some information about the relative or absolute position of the tokens in the sequence """
+
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
+        """ Constructor
+        Args:
+            d_model: size of the incoming feature vector
+            dropout: amount of hidden neurons in the bidirectional lstm
+            max_len: amount of cnn layers
+        """
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
@@ -25,23 +34,26 @@ class PositionalEncoding(nn.Module):
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        """ Forwarding logic """
+
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
 
 class CNNTrans(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_head, dropout, encoder_layers, language_model, **kwargs):
-        """ Initializes the model with the required layers
+    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_head: int, dropout: float, encoder_layers: int, language_model: str, **kwargs):
+        """ Constructor
         Args:
-            init_n_channels [int]: size of the incoming feature vector
-            out_channels [int]: amount of hidden neurons in the bidirectional lstm
-            cnn_layers [int]: amount of cnn layers
-            kernel_size [tuple]: kernel sizes of the cnn layers
-            padding [tuple]: padding of the cnn layers
-            n_head [int]: amount of attention heads
-            dropout [float]: amount of dropout
-            encoder_layers [int]: amount of encoder layers
+            init_n_channels: size of the incoming feature vector
+            out_channels: amount of hidden neurons in the bidirectional lstm
+            cnn_layers: amount of cnn layers
+            kernel_size: kernel sizes of the cnn layers
+            padding: padding of the cnn layers
+            n_head: amount of attention heads
+            dropout: amount of dropout
+            encoder_layers: amount of encoder layers
+            language_model: path to language model weights
         """
         super(CNNTrans, self).__init__()
 
@@ -88,12 +100,12 @@ class CNNTrans(ModelBase):
 
         log.info(f'<init>: \n{self}')
         
-    def forward(self, x, mask):
+    def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
+        """Forwarding logic"""
+
         max_length = x.size(1)
 
         x = self.embedding(x)
-
-        # calculate the residuals
         x = x.permute(0,2,1)
 
         # concatenate channels from residuals and input + batch norm

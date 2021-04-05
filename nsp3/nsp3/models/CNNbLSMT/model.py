@@ -11,18 +11,19 @@ log = setup_logger(__name__)
 
 
 class CNNbLSTM(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers):
-        """ Initialization of the CNNbLSTM model
+    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int):
+        """ Constructor
         Args:
-            init_n_channels [int]: size of the incoming feature vector
-            out_channels [int]: amount of hidden neurons in the bidirectional lstm
-            cnn_layers [int]: amount of cnn layers
-            kernel_size [tuple]: kernel sizes of the cnn layers
-            padding [tuple]: padding of the cnn layers
-            n_hidden [int]: amount of hidden neurons
-            dropout [float]: amount of dropout
-            lstm_layers [int]: amount of bidirectional lstm layers
+            init_n_channels: size of the incoming feature vector
+            out_channels: amount of hidden neurons in the bidirectional lstm
+            cnn_layers: amount of cnn layers
+            kernel_size: kernel sizes of the cnn layers
+            padding: padding of the cnn layers
+            n_hidden: amount of hidden neurons
+            dropout: amount of dropout
+            lstm_layers: amount of bidirectional lstm layers
         """
+
         super(CNNbLSTM, self).__init__()
 
         # CNN blocks
@@ -66,10 +67,10 @@ class CNNbLSTM(ModelBase):
 
         log.info(f'<init>: \n{self}')
         
-    def forward(self, x, mask):
-        max_length = x.size(1)
+    def forward(self, x, mask) -> list:
+        """ Forwarding logic """
 
-        # calculate the residuals
+        max_length = x.size(1)
         x = x.permute(0,2,1)
 
         # concatenate channels from residuals and input + batch norm

@@ -21,13 +21,12 @@ class Trainer(TrainerBase):
 
     def _train_epoch(self, epoch: int) -> dict:
         """ Training logic for an epoch
-
         Args:
             epoch: current epoch
-
         Returns :
             dictionary containing results for the epoch.
         """
+        
         self.model.train()
 
         loss_mtr = AverageMeter('loss')
@@ -85,7 +84,6 @@ class Trainer(TrainerBase):
 
     def _log_batch(self, epoch: int, batch_idx: int, batch_size: int, len_data: int, loss: float):
         """ Logging of the batches
-
         Args:
             epoch: current epoch
             batch_idx: indexes of the batch
@@ -93,6 +91,7 @@ class Trainer(TrainerBase):
             len_data: length of the data
             loss: training loss of the batch
         """
+
         n_samples = batch_size * len_data
         n_complete = batch_idx * batch_size
         percent = 100.0 * batch_idx / len_data
@@ -102,14 +101,13 @@ class Trainer(TrainerBase):
 
     def _eval_metrics(self, output: torch.tensor, target: torch.tensor) -> float:
         """ Evaluate metrics
-
         Args:
             output: output from model
             target: labels matching the output
-
         Returns:
             values from each metric
         """
+
         with torch.no_grad():
             i = 0
             for metric in self.metrics:
@@ -120,13 +118,12 @@ class Trainer(TrainerBase):
 
     def _valid_epoch(self, epoch: int) -> dict:
         """ Validate after training an epoch
-
         Args:
             epoch: current epoch
-            
         Returns:
             contains keys 'val_loss' and 'val_metrics'.
         """
+
         self.model.eval()
 
         loss_mtr = AverageMeter('loss')

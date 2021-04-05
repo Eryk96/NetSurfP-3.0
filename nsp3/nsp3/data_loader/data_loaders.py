@@ -22,6 +22,7 @@ class NSPDataLoader(DataLoaderBase):
             nworkers: workers for the dataloader class
             test_path: path to the test dataset(s)
         """
+
         self.dataset_loader = getattr(module_dataset, dataset_loader)
 
         self.train_dataset = self.dataset_loader(train_path[0])
@@ -46,11 +47,10 @@ class NSPDataLoader(DataLoaderBase):
 
     def _split(self, validation_split: float):
         """ Creates a sampler to extract training and validation data
-
         Args:
             validation_split: decimal for the split of the validation
         """
-
+        
         # random indices based off the validation split
         num_train = len(self.train_dataset)
         train_indices = np.array(range(num_train))

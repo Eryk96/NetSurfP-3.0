@@ -4,7 +4,6 @@ import numpy as np
 
 def get_mask(labels: torch.tensor, use_disorder_mask: bool = False, use_unknown_mask: bool = False) -> torch.tensor:
     """ Returns mask from labels
-
     Args:
         labels: tensor containing labels
         use_disorder_mask: apply disorder mask
@@ -25,7 +24,6 @@ def get_mask(labels: torch.tensor, use_disorder_mask: bool = False, use_unknown_
 
 def dihedral_to_radians(angle: torch.tensor) -> torch.tensor:
     """ Converts angles to radians
-    
     Args:
         angles: tensor containing angle values
     """
@@ -34,7 +32,6 @@ def dihedral_to_radians(angle: torch.tensor) -> torch.tensor:
 
 def arctan_dihedral(sin: torch.tensor, cos: torch.tensor) -> torch.tensor:
     """ Converts sin and cos back to diheral angles
-
     Args:
         sin: tensor with sin values 
         cos: tensor with cos values
@@ -48,7 +45,6 @@ def arctan_dihedral(sin: torch.tensor, cos: torch.tensor) -> torch.tensor:
 
 def fpr(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Returns false positive rate
-
     Args:
         inputs: tensor with binary values
         labels: tensor with binary values
@@ -61,7 +57,6 @@ def fpr(pred: torch.tensor, labels: torch.tensor) -> float:
 
 def fnr(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Returns false negative rate
-
     Args:
         inputs: tensor with binary values
         labels: tensor with binary values
@@ -74,7 +69,6 @@ def fnr(pred: torch.tensor, labels: torch.tensor) -> float:
 
 def mcc(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Returns mathews correlation coefficient
-
     Args:
         inputs: tensor with binary values
         labels: tensor with binary values
@@ -89,7 +83,6 @@ def mcc(pred: torch.tensor, labels: torch.tensor) -> float:
 
 def pcc(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Returns pearson correlation coefficient
-
     Args:
         inputs: tensor with predicted values
         labels: tensor with correct values
@@ -102,7 +95,6 @@ def pcc(pred: torch.tensor, labels: torch.tensor) -> float:
 
 def mae(pred: torch.tensor, labels: torch.tensor) -> float:
     """ Returns mean absolute error
-
     Args:
         inputs: tensor with predicted values
         labels: tensor with correct values
@@ -123,7 +115,6 @@ def accuracy(pred: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_ss8(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns SS8 metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -138,7 +129,6 @@ def metric_ss8(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_ss3(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns SS3 metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -155,7 +145,6 @@ def metric_ss3(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_dis_mcc(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns mathews correlation coefficient disorder metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -172,7 +161,6 @@ def metric_dis_mcc(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_dis_fpr(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns false positive rate disorder metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -188,7 +176,6 @@ def metric_dis_fpr(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_rsa(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns relative surface accesibility metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -203,7 +190,6 @@ def metric_rsa(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_asa(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns absolute surface accesibility metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -218,7 +204,6 @@ def metric_asa(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_phi(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns phi angle metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values
@@ -236,7 +221,6 @@ def metric_phi(outputs: torch.tensor, labels: torch.tensor) -> float:
 
 def metric_psi(outputs, labels) -> float:
     """ Returns psi angle metric
-
     Args:
         outputs: tensor with predicted values
         labels: tensor with correct values

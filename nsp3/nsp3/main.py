@@ -26,7 +26,7 @@ from nsp3.utils import setup_logger
 log = setup_logger(__name__)
 
 
-def train(cfg: Dict, resume: str):
+def train(cfg: dict, resume: str):
     """ Loads configuration and trains and evaluates a model
     args:
         cfg: dictionary containing the configuration of the experiment
@@ -81,10 +81,10 @@ def train(cfg: Dict, resume: str):
 
 def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
     """ Setup GPU device if available, move model into configured device
-    args:
+    Args:
         model: Module to move to GPU
         target_devices: list of target devices
-    returns:
+    Returns:
         the model that now uses the gpu and the device
     """
     available_devices = list(range(torch.cuda.device_count()))
@@ -123,10 +123,10 @@ def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.dev
 
 def setup_param_groups(model: nn.Module, config: dict) -> list:
     """ Setup model parameters
-    args:
+    Args:
         model: pytorch model
         config: configuration containing params
-    returns:
+    Returns:
         list with model parameters
     """
     return [{'params': model.parameters(), **config}]
@@ -134,9 +134,7 @@ def setup_param_groups(model: nn.Module, config: dict) -> list:
 
 def resume_checkpoint(resume_path: str, model: nn.Module, 
     optimizer: module_optimizer, config: dict) -> (nn.Module, module_optimizer, int):
-    """
-    Resume from saved checkpoint.
-    """
+    """ Resume from saved checkpoint. """
     if not resume_path:
         return model, optimizer, 0
 
@@ -157,15 +155,14 @@ def resume_checkpoint(resume_path: str, model: nn.Module,
 
 def get_instance(module: ModuleType, name: str, config: Dict, *args: Any) -> Any:
     """ Helper to construct an instance of a class.
-    args
+    Args
         module: Module containing the class to construct.
         name: Name of class, as would be returned by ``.__class__.__name__``.
         config: Dictionary containing an 'args' item, which will be used as ``kwargs`` to construct the class instance.
         *args : Positional arguments to be given before ``kwargs`` in ``config``.
-    returns:
+    Returns:
         any instance of a class
     """
-
     ctor_name = config[name]['type']
 
     if ctor_name == None:
@@ -177,7 +174,7 @@ def get_instance(module: ModuleType, name: str, config: Dict, *args: Any) -> Any
 
 def seed_everything(seed: int):
     """ Sets a seed on python, numpy and pytorch
-    args:
+    Args:
         seed: number of the seed
     """
     random.seed(seed)

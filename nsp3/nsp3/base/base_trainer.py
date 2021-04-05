@@ -28,8 +28,10 @@ class TrainerBase:
             metrics: list containing each metric
             optimizer: optimizer method
             start_epoch: starting epoch
+            config: loaded configuration file
             device: device for the tensors
         """
+        
         self.model = model
         self.loss = loss
         self.metrics = metrics
@@ -52,6 +54,7 @@ class TrainerBase:
 
     def train(self):
         """ Full training logic """
+
         log.info('Starting training...')
         for epoch in range(self.start_epoch, self.epochs):
             result = self._train_epoch(epoch)
@@ -108,16 +111,16 @@ class TrainerBase:
 
     def _train_epoch(self, epoch: int) -> dict:
         """ Training logic for an epoch. """
+
         raise NotImplementedError
 
     def _save_checkpoint(self, epoch: int, save_best: bool = False):
         """ Saving checkpoints
-
         Args:
             epoch: current epoch number
-            log: logging information of the epoch
             save_best: if True, rename the saved checkpoint to 'model_best.pth'
         """
+
         arch = type(self.model).__name__
         state = {
             'arch': arch,
@@ -136,7 +139,11 @@ class TrainerBase:
             log.info(f'Saving current best: {best_path}')
 
     def _setup_monitoring(self, config: dict) -> None:
-        """ Configuration to monitor model performance and save best. """
+        """ Configuration to monitor model performance and save best. 
+        Args:
+            config: loaded configuration file
+        """
+
         self.epochs = config['epochs']
         self.save_period = config['save_period']
         self.monitor = config.get('monitor', 'off')

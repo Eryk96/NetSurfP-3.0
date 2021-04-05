@@ -13,11 +13,10 @@ log = setup_logger(__name__)
 
 class ESM1b(ModelBase):
     def __init__(self, in_features: int, language_model: str, **kwargs):
-        """ Initializes the model
+        """ Constructor
         Args:
             in_features: size of the embedding features
             language_model: path to the language model weights
-            feature_extracting: finetune or do feature extraction from language model
         """
         super(ESM1b, self).__init__()
 
@@ -49,13 +48,17 @@ class ESM1b(ModelBase):
         log.info(f'<init>: \n{self}')
 
     def parameters(self, recurse: bool = True) -> list:
+        """ Returns the parameters to learn """
+        
         log.info("Params to learn:")
         for name, param in self.named_parameters(recurse=recurse):
             if param.requires_grad == True:
                 log.info("\t" + name)
                 yield param
 
-    def forward(self, x, mask):
+    def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
+        """ Forwarding logic """
+
         x = self.embedding(x)
 
         # hidden neurons to classes

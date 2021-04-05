@@ -7,6 +7,7 @@ from nsp3.base import EvaluateBase, AverageMeter
 
 class Evaluate(EvaluateBase):
     """ Responsible for test evaluation and the metrics. """
+
     def __init__(self, model: nn.Module, metrics: list, metrics_task: list, device: torch.device,
             test_data_loader: list, checkpoint_dir: str, writer_dir: str):
         super().__init__(model, metrics, metrics_task, checkpoint_dir, writer_dir, device)
@@ -20,7 +21,7 @@ class Evaluate(EvaluateBase):
             device: device for the tensors
             test_data_loader: list Dataloader containing the test data
         """
-
+        
         self.path = test_data_loader[0]
         self.test_data_loader = test_data_loader[1]
     
@@ -51,9 +52,13 @@ class Evaluate(EvaluateBase):
 
         return results
 
+    def _eval_metrics(self, output: torch.tensor, target: torch.tensor) -> float:
+        """ Evaluation of metrics 
+        Args:
+            output: tensor with output values from the model
+            target: tensor with target values
+        """
 
-    def _eval_metrics(self, output, target):
-        """ Evaluation of metrics """
         with torch.no_grad():
             i = 0
             for metric in self.metrics:
@@ -61,9 +66,9 @@ class Evaluate(EvaluateBase):
                 i += 1
                 yield value
 
-
     def _write_test(self):
         """ Write test results """
+
         with open(self.writer_dir / "results", "a") as evalf:
             evalf.write(self.path + "\n")
             for metric, value in self.evaluations.items():

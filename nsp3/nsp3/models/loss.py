@@ -6,7 +6,6 @@ from nsp3.models.metric import dihedral_to_radians, arctan_dihedral, get_mask
 
 def mse(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor) -> torch.tensor:
     """ Returns mean squared loss using masking
-
     Args:
         outputs: tensor with predictions
         labels: tensor with labels
@@ -18,7 +17,6 @@ def mse(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor) -> torc
 
 def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor) -> torch.tensor:
     """ Returns cross entropy loss using masking
-
     Args:
         outputs: tensor with predictions
         labels: tensor with labels
@@ -32,7 +30,6 @@ def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tenso
 
 def ss8(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns SS8 loss
-
     Args:
         outputs: tensor with SS8 predictions
         labels: tensor with labels
@@ -47,7 +44,6 @@ def ss8(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
 def ss3(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns SS3 loss
-
     Args:
         outputs: tensor with SS3 predictions
         labels: tensor with labels
@@ -64,7 +60,6 @@ def ss3(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
 def disorder(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns disorder loss
-
     Args:
         outputs: tensor with disorder predictions
         labels: tensor with labels
@@ -81,7 +76,6 @@ def disorder(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
 def rsa(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns relative surface accesibility loss
-
     Args:
         outputs: tensor with rsa predictions
         labels: tensor with labels
@@ -96,7 +90,6 @@ def rsa(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
 def phi(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns phi loss
-
     Args:
         outputs: tensor with phi predictions
         labels: tensor with labels
@@ -114,7 +107,6 @@ def phi(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
 def psi(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns psi loss
-
     Args:
         outputs: tensor with psi predictions
         labels: tensor with labels
@@ -133,7 +125,6 @@ def psi(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns a weighted multi task loss. 
         Combines ss8, ss3, disorder, rsa, phi and psi loss.
-
     Args:
         outputs: tensor with psi predictions
         labels: tensor with labels
@@ -157,7 +148,6 @@ def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor
 
 def secondary_structure_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns a weighted double task loss for secondary structure. 
-
     Args:
         outputs: tensor with psi predictions
         labels: tensor with labels

@@ -12,17 +12,18 @@ log = setup_logger(__name__)
 
 
 class CNNbLSTM_ESM1b(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers, language_model, **kwargs):
-        """ Initializes the model with the required layers
+    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int, language_model, **kwargs):
+        """ Constructor
         Args:
-            init_n_channels [int]: size of the incoming feature vector
-            out_channels [int]: amount of hidden neurons in the bidirectional lstm
-            cnn_layers [int]: amount of cnn layers
-            kernel_size [tuple]: kernel sizes of the cnn layers
-            padding [tuple]: padding of the cnn layers
-            n_hidden [int]: amount of hidden neurons
-            dropout [float]: amount of dropout
-            lstm_layers [int]: amount of bidirectional lstm layers
+            init_n_channels: size of the incoming feature vector
+            out_channels: amount of hidden neurons in the bidirectional lstm
+            cnn_layers: amount of cnn layers
+            kernel_size: kernel sizes of the cnn layers
+            padding: padding of the cnn layers
+            n_hidden: amount of hidden neurons
+            dropout: amount of dropout
+            lstm_layers: amount of bidirectional lstm layers
+            language_model: path to language model weights
         """
         super(CNNbLSTM_ESM1b, self).__init__()
 
@@ -55,17 +56,20 @@ class CNNbLSTM_ESM1b(ModelBase):
         log.info(f'<init>: \n{self}')
 
     def parameters(self, recurse: bool = True) -> list:
+        """ Returns the parameters to learn """
+        
         log.info("Params to learn:")
         for name, param in self.named_parameters(recurse=recurse):
             if param.requires_grad == True:
                 log.info("\t" + name)
                 yield param
 
-    def forward(self, x, mask):
+    def forward(self, x: torch.tensor, mask: torch.tensor) -> list:
+        """ Forwarding logic """
+
         max_length = x.size(1)
 
         x = self.embedding(x)
-        # calculate the residuals
         x = x.permute(0,2,1)
 
         # concatenate channels from residuals and input + batch norm
@@ -90,17 +94,18 @@ class CNNbLSTM_ESM1b(ModelBase):
 
 
 class CNNbLSTM_ESM1b_All(ModelBase):
-    def __init__(self, init_n_channels, out_channels, cnn_layers, kernel_size, padding, n_hidden, dropout, lstm_layers, language_model, **kwargs):
-        """ Initialization of the CNNbLSTM model
+    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int, language_model: str, **kwargs):
+        """ Constructor
         Args:
-            init_n_channels [int]: size of the incoming feature vector
-            out_channels [int]: amount of hidden neurons in the bidirectional lstm
-            cnn_layers [int]: amount of cnn layers
-            kernel_size [tuple]: kernel sizes of the cnn layers
-            padding [tuple]: padding of the cnn layers
-            n_hidden [int]: amount of hidden neurons
-            dropout [float]: amount of dropout
-            lstm_layers [int]: amount of bidirectional lstm layers
+            init_n_channels: size of the incoming feature vector
+            out_channels: amount of hidden neurons in the bidirectional lstm
+            cnn_layers: amount of cnn layers
+            kernel_size: kernel sizes of the cnn layers
+            padding: padding of the cnn layers
+            n_hidden: amount of hidden neurons
+            dropout: amount of dropout
+            lstm_layers: amount of bidirectional lstm layers
+            language_model: path to language model weights
         """
         super(CNNbLSTM_ESM1b_All, self).__init__()
 
@@ -148,20 +153,22 @@ class CNNbLSTM_ESM1b_All(ModelBase):
         log.info(f'<init>: \n{self}')
 
     def parameters(self, recurse: bool = True) -> list:
+        """ Returns the parameters to learn """
+
         log.info("Params to learn:")
         for name, param in self.named_parameters(recurse=recurse):
             if param.requires_grad == True:
                 log.info("\t" + name)
                 yield param
         
-    def forward(self, x, mask):
+    def forward(self, x: torch.tensor, mask: torch.tensor) -> list:
+        """ Forwarding logic """
+
         max_length = x.size(1)
 
         x = self.embedding(x)
-
-        # calculate the residuals
         x = x.permute(0,2,1)
-
+    
         # concatenate channels from residuals and input + batch norm
         r = x
         for layer in self.conv:

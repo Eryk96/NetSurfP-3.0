@@ -22,6 +22,7 @@ class EvaluateBase:
             writer_dir: directory to write results
             device: device for the tensors
         """
+        
         self.model = model
         self.metrics = metrics
         self.metrics_task = metrics_task
@@ -58,10 +59,8 @@ class EvaluateBase:
 
     def _evaluate_epoch(self) -> dict:
         """ Evaluation logic for the single epoch. """
-
         raise NotImplementedError
 
     def _write_test(self) -> dict:
         """ Write finished evaluation """
-
         raise NotImplementedError

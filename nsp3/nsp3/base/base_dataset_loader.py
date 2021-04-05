@@ -12,6 +12,7 @@ class DatasetBase(Dataset):
         Args:
             path: file path for the dataset
         """
+
         data = torch.from_numpy(np.load(path)['data'])
 
         self.X = data[:, :, :50].clone().detach().float()
@@ -24,6 +25,7 @@ class DatasetBase(Dataset):
 
     def add_unknown_nucleotide_mask(self):
         """ Augments the target with a unknown nucleotide mask by finding entries that don't have any residue"""
+
         # creates a mask based on the one hot encoding
         unknown_nucleotides = torch.max(self.X[:, :, :20], dim=2)
         unknown_nucleotides = unknown_nucleotides[0].unsqueeze(2)
@@ -36,8 +38,10 @@ class DatasetBase(Dataset):
         Args:
             index: Index at the array
         """
+
         return self.X[index], self.y[index], self.lengths[index]
 
     def __len__(self):
         """ Returns the length of the data """
+        
         return len(self.X)

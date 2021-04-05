@@ -12,7 +12,7 @@ class NSPData(DatasetBase):
 
 class NSPDataOnlyEncoding(DatasetBase):
     """ NetsurfP 2.0 dataset .npz file with only input encodings"""
-
+    
     def __init__(self, *args, **kwargs):
         super(NSPDataOnlyEncoding, self).__init__(*args, **kwargs)
         self.X = self.X[:, :, :20]

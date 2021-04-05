@@ -23,7 +23,7 @@ def cli():
     )
 )
 @click.option('-r', '--resume', default=None, type=str, help='path to checkpoint')
-def train(config_filename, resume):
+def train(config_filename: str, resume: str):
     """ Entry point to start training run(s). """
     configs = [load_config(f) for f in config_filename]
     for config in configs:

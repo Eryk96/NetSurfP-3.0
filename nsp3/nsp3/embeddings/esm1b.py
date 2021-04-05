@@ -43,9 +43,17 @@ class ESM1bEmbedding(nn.Module):
         """ Constructor
         Args:
             model_path: path to language model
+            ft_embed_tokens: finetune embed tokens layer
+            ft_transformer: finetune transformer layer
+            ft_contact_head: finetune contact head
+            ft_embed_positions: finetune embedding positions
+            ft_emb_layer_norm_before: finetune embedding layer norm before
+            ft_emb_layer_norm_after: finetune embedding layer norm after
+            ft_lm_head: finetune lm head layer
             max_embeddings: maximum sequence length for language model
             offset: overlap offset when concatenating sequences above max embedding
         """
+
         super(ESM1bEmbedding, self).__init__()
 
         # configure pre-trained model
@@ -61,6 +69,8 @@ class ESM1bEmbedding(nn.Module):
         self._finetune()
 
     def _finetune(self):
+        """ Finetune by freezing chosen layers """
+
         # finetune by freezing unchoosen layers
         for i, child in enumerate(self.model.children()):
             if self.finetune[i] == False:
@@ -68,6 +78,11 @@ class ESM1bEmbedding(nn.Module):
                     param.requires_grad = False
 
     def _decode_sparse_encoding(self, x: torch.tensor) -> list:
+        """ Decodes an AA sparse encoding back to a string sequence
+        Args:
+            x: tensor with sequence x residue x sparse encoding
+        """
+
         # get sparse positions
         x = (torch.argmax(x[:, :, :20], axis=2) + 1) * torch.amax(x[:, :, :20], axis=2)
 
@@ -82,6 +97,11 @@ class ESM1bEmbedding(nn.Module):
         return sequences
 
     def forward(self, x: torch.tensor) -> torch.tensor:
+        """ Convert AA sequence to embeddings
+        Args:
+            x: tensor with sequence x residue x sparse encoding
+        """
+        
         device = x.device
         sequence_length = x.shape[1]
 
