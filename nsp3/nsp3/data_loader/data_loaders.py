@@ -10,8 +10,8 @@ from nsp3.base import DataLoaderBase
 class NSPDataLoader(DataLoaderBase):
     """ NSPDataLoader to load NetSurfP training data """
 
-    def __init__(self, train_path: str, dataset_loader: str, batch_size: int, shuffle: bool, validation_split: float,
-                    nworkers: int, test_path: str = None):
+    def __init__(self, train_path: list, test_path: list, dataset_loader: str, batch_size: int, shuffle: bool, 
+                    validation_split: float, nworkers: int):
         """ Constructor
         Args:
             train_path: path to the training dataset
@@ -22,7 +22,6 @@ class NSPDataLoader(DataLoaderBase):
             nworkers: workers for the dataloader class
             test_path: path to the test dataset(s)
         """
-
         self.dataset_loader = getattr(module_dataset, dataset_loader)
 
         self.train_dataset = self.dataset_loader(train_path[0])
@@ -50,7 +49,6 @@ class NSPDataLoader(DataLoaderBase):
         Args:
             validation_split: decimal for the split of the validation
         """
-        
         # random indices based off the validation split
         num_train = len(self.train_dataset)
         train_indices = np.array(range(num_train))
@@ -69,7 +67,6 @@ class NSPDataLoader(DataLoaderBase):
 
     def split_validation(self) -> DataLoader:
         """ Returns the validation data """
-
         if self.valid_sampler is None:
             return None
         else:
@@ -77,8 +74,8 @@ class NSPDataLoader(DataLoaderBase):
 
     def get_test(self) -> list:
         """ Returns the test data """
-
         test_data = []
         for path in self.test_path:
-            test_data.append((path, DataLoader(self.dataset_loader(path), **self.init_kwargs)))
+            test_data.append(
+                (path, DataLoader(self.dataset_loader(path), **self.init_kwargs)))
         return test_data

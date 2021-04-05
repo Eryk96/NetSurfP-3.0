@@ -11,13 +11,14 @@ class Trainer(TrainerBase):
     """ Responsible for training loop and validation. """
 
     def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device,
-                 data_loader, valid_data_loader=None, lr_scheduler=None):
+                 data_loader, batch_transform, valid_data_loader=None, lr_scheduler=None):
         super().__init__(model, loss, metrics, metrics_task, optimizer, start_epoch, config, device)
         self.data_loader = data_loader
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size)) * 8
+        self.batch_transform = batch_transform
 
     def _train_epoch(self, epoch: int) -> dict:
         """ Training logic for an epoch
@@ -33,6 +34,11 @@ class Trainer(TrainerBase):
         metric_mtrs = [AverageMeter(m.__name__) for m in self.metrics]
 
         for batch_idx, (data, target, mask) in enumerate(self.data_loader):
+            if self.batch_transform:
+                data = self.batch_transform(data)
+
+            breakpoint()
+
             data, target = data.to(self.device), target.to(self.device)
 
             # backpropagate using loss criterion

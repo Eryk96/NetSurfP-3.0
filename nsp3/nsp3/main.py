@@ -43,6 +43,7 @@ def train(cfg: dict, resume: str):
     lr_scheduler = get_instance(module_scheduler, 'lr_scheduler', cfg, optimizer)
     model, optimizer, start_epoch = resume_checkpoint(resume, model, optimizer, cfg)
 
+    transforms = get_instance(module_aug, 'augmentation', cfg)
     data_loader = get_instance(module_data, 'data_loader', cfg)
     valid_data_loader = data_loader.split_validation()
     test_data_loader = data_loader.get_test()
@@ -59,6 +60,7 @@ def train(cfg: dict, resume: str):
                         config=cfg,
                         device=device,
                         data_loader=data_loader,
+                        batch_transform=transforms,
                         valid_data_loader=valid_data_loader,
                         lr_scheduler=lr_scheduler)
 

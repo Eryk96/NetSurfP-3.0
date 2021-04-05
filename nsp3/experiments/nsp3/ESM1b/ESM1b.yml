@@ -12,15 +12,19 @@ arch:
 data_loader:
   type: NSPDataLoader
   args:
-    train_path: [../data/nsp2/training_data/Train_HHblits.npz]
+    train_path: [../data/nsp2/training_data/Train_HHblits_small.npz]
     test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
                 ../data/nsp2/training_data/CB513_HHblits.npz, 
                 ../data/nsp2/training_data/TS115_HHblits.npz]
     dataset_loader: NSPDataOnlyEncoding
     batch_size: 15
-    nworkers: 4
+    nworkers: 0
     shuffle: true
     validation_split: 0.05
+
+augmentation:
+  type: sparse_token
+  args: {}
 
 loss: multi_task_loss
 

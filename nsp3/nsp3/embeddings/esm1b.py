@@ -8,38 +8,12 @@ import esm
 import math
 import argparse
 
-from numpy.core.defchararray import translate
-
-AA_TRANSLATE = {
-    0: "X",
-    1: "A",
-    2: "C",
-    3: "D",
-    4: "E",
-    5: "F",
-    6: "G",
-    7: "H",
-    8: "I",
-    9: "K",
-    10: "L",
-    11: "M",
-    12: "N",
-    13: "P",
-    14: "Q",
-    15: "R",
-    16: "S",
-    17: "T",
-    18: "V",
-    19: "W",
-    20: "Y",
-}
-
-
 class ESM1bEmbedding(nn.Module):
     """ ESM1b embedding layer module """
 
     def __init__(self, model_path: str, ft_embed_tokens: bool = False, ft_transformer: bool = False, ft_contact_head: bool = False,
-                 ft_embed_positions: bool = False, ft_emb_layer_norm_before: bool = False, ft_emb_layer_norm_after: bool = False, ft_lm_head: bool = False, max_embedding: int = 1024, offset: int = 200):
+                 ft_embed_positions: bool = False, ft_emb_layer_norm_before: bool = False, ft_emb_layer_norm_after: bool = False, 
+                 ft_lm_head: bool = False, max_embedding: int = 1024, offset: int = 200):
         """ Constructor
         Args:
             model_path: path to language model
@@ -53,7 +27,6 @@ class ESM1bEmbedding(nn.Module):
             max_embeddings: maximum sequence length for language model
             offset: overlap offset when concatenating sequences above max embedding
         """
-
         super(ESM1bEmbedding, self).__init__()
 
         # configure pre-trained model
@@ -66,10 +39,6 @@ class ESM1bEmbedding(nn.Module):
         # finetuning, freezes all layers by default
         self.finetune = [ft_embed_tokens, ft_transformer, ft_contact_head,
             ft_embed_positions, ft_emb_layer_norm_before, ft_emb_layer_norm_after, ft_lm_head]
-        self._finetune()
-
-    def _finetune(self):
-        """ Finetune by freezing chosen layers """
 
         # finetune by freezing unchoosen layers
         for i, child in enumerate(self.model.children()):
@@ -77,39 +46,11 @@ class ESM1bEmbedding(nn.Module):
                 for param in child.parameters():
                     param.requires_grad = False
 
-    def _decode_sparse_encoding(self, x: torch.tensor) -> list:
-        """ Decodes an AA sparse encoding back to a string sequence
+    def forward(self, x: torch.tensor, padding_length: int = None) -> torch.tensor:
+        """ Convert tokens to embeddings
         Args:
-            x: tensor with sequence x residue x sparse encoding
+            x: tensor with sequence tokens
         """
-
-        # get sparse positions
-        x = (torch.argmax(x[:, :, :20], axis=2) + 1) * torch.amax(x[:, :, :20], axis=2)
-
-        sequences = []
-
-        # decode sparse encoding to residue sequence
-        batches = x.shape[0]
-        for i in range(batches):
-            sequence = "".join(map(lambda r: AA_TRANSLATE[r.item()], x[i])).rstrip("X")
-            sequences.append(("protein_" + str(i), sequence))
-
-        return sequences
-
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        """ Convert AA sequence to embeddings
-        Args:
-            x: tensor with sequence x residue x sparse encoding
-        """
-
-        device = x.device
-        sequence_length = x.shape[1]
-
-        x = self._decode_sparse_encoding(x)
-
-        # make tokens and move to cude if possible
-        batch_labels, batch_strs, batch_tokens = self.batch_converter(x)
-        batch_tokens = batch_tokens.to(device)
         batch_sequences, batch_residues = batch_tokens.shape
 
         embedding = self.model(batch_tokens[:, :self.max_embedding], repr_layers=[33])[
@@ -123,11 +64,13 @@ class ESM1bEmbedding(nn.Module):
                 o2 = o1 + self.max_embedding
                 embedding = torch.cat([embedding[:, :o1], self.model(
                     batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33]], dim=1)
+
             embedding = torch.nan_to_num(embedding)
 
         # add padding
-        embedding = F.pad(embedding, pad=(0, 0, 0, sequence_length
-                          - embedding.shape[1]), mode='constant', value=0)
+        if padding_length:
+            embedding = F.pad(embedding, pad=(0, 0, 0, padding_length
+                            - embedding.shape[1]), mode='constant', value=0)
 
         # cleanup
         del batch_tokens

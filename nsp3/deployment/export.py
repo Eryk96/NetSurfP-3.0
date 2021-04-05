@@ -1,3 +1,4 @@
+import esm
 import torch
 import nsp3.models as module_arch
 
@@ -11,6 +12,9 @@ def export(experiment: dict, weights: str):
 
     model.eval()
 
-    example_input = ("protein", "GLLQVATERYVGDEIERQLDDYGLGDVVNPTTPGALHINFSILCTYSMHEHRMPVEPPDV")
-    traced_model = torch.jit.trace(model, example_input)
+    example_input = [("protein", "GLLQVATERYVGDEIERQLDDYGLGDVVNPTTPGALHINFSILCTYSMHEHRMPVEPPDV")]
+
+    traced_model = torch.jit.trace(model, batch_tokens)
     traced_model.save("deployment/export.pt")
+
+    print("Model exported succesfully. Saved as deployment/export.pt")
