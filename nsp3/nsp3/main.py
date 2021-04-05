@@ -16,8 +16,6 @@ import nsp3.models.loss as module_loss
 import nsp3.models.metric as module_metric
 import nsp3.models as module_arch
 
-import nsp3.models as module_models
-
 from nsp3.trainer import Trainer
 from nsp3.eval import Evaluate
 from nsp3.utils import setup_logger

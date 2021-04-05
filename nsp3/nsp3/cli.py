@@ -2,8 +2,8 @@ import click
 import yaml
 
 from nsp3 import main
+from nsp3 import deployment
 from nsp3.utils import setup_logging
-
 
 @click.group()
 def cli():
@@ -22,6 +22,7 @@ def cli():
         'executed in order'
     )
 )
+
 @click.option('-r', '--resume', default=None, type=str, help='path to checkpoint')
 def train(config_filename: str, resume: str):
     """ Entry point to start training run(s). """
@@ -30,6 +31,11 @@ def train(config_filename: str, resume: str):
         setup_logging(config)
         main.train(config, resume)
 
+@click.option('-w', '--weights', default=None, type=str, help='path to desired model')
+def export(config_filename: str, weights: str):
+    configs = [load_config(f) for f in config_filename]
+    for config in configs:
+        deployment.export(config, weights)
 
 def load_config(filename: str) -> dict:
     """ Load a configuration file as YAML. """

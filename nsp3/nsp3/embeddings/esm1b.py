@@ -101,7 +101,7 @@ class ESM1bEmbedding(nn.Module):
         Args:
             x: tensor with sequence x residue x sparse encoding
         """
-        
+
         device = x.device
         sequence_length = x.shape[1]
 
