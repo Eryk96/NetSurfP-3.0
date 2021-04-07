@@ -1,0 +1,35 @@
+name: nsp3
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+  - scipy
+  - matplotlib
+  - pandas
+  - pytest
+  - flake8
+  - rope
+  - autopep8
+  - black
+  - click
+  - pyyaml
+  - absl-py
+  - future
+  - tqdm
+  - tensorboard=2.4.1
+  - tensorboard-plugin-wit=1.8.0
+  - pip:
+    - biopython==1.78
+    - data==0.4
+    - fair-esm==0.3.1
+    - funcsigs==1.0.2
+    - h5py==3.2.1
+    - install==1.3.4
+    - latex==0.7.0
+    - scienceplots==1.0.7
+    - shutilwhich==1.1.0
+    - tempdir==0.7.1
+    - torch==1.8.0
+    - torchvision==0.9.0

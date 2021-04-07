@@ -1,6 +1,5 @@
 import click
 import yaml
-import deployment
 
 from nsp3 import main
 from nsp3.utils import setup_logging
@@ -30,14 +29,6 @@ def train(config_filename: str, resume: str):
     for config in configs:
         setup_logging(config)
         main.train(config, resume)
-
-@cli.command()
-@click.option('-c', '--config-filename', default=['experiments/config.yml'], help='Path to model configuration file.')
-@click.option('-w', '--model_data', default=None, type=str, help='Path to desired model')
-def export(config_filename: str, model_data: str):
-    """ Export model for docker deployment. """
-    config = load_config(config_filename)
-    deployment.export(config, model_data)
 
 
 @cli.command()

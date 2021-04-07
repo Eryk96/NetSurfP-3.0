@@ -11,7 +11,7 @@ from nsp3.embeddings import ESM1bEmbedding
 log = setup_logger(__name__)
 
 
-class CNNbLSTM_ESM1b(ModelBase):
+class CNNbLSTM_ESM1b_SecondaryStructure(ModelBase):
     def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int, language_model, **kwargs):
         """ Constructor
         Args:
@@ -25,7 +25,7 @@ class CNNbLSTM_ESM1b(ModelBase):
             lstm_layers: amount of bidirectional lstm layers
             language_model: path to language model weights
         """
-        super(CNNbLSTM_ESM1b, self).__init__()
+        super(CNNbLSTM_ESM1b_SecondaryStructure, self).__init__()
 
         self.embedding = ESM1bEmbedding(language_model, **kwargs)
 
@@ -93,8 +93,8 @@ class CNNbLSTM_ESM1b(ModelBase):
         return [ss8, ss3]
 
 
-class CNNbLSTM_ESM1b_All(ModelBase):
-    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int, language_model: str, **kwargs):
+class CNNbLSTM_ESM1b_Complete(ModelBase):
+    def __init__(self, init_n_channels: int, out_channels: int, cnn_layers: int, kernel_size: tuple, padding: tuple, n_hidden: int, dropout: float, lstm_layers: int, embedding_args: dict, embedding_pretrained: str = None, **kwargs):
         """ Constructor
         Args:
             init_n_channels: size of the incoming feature vector
@@ -107,9 +107,10 @@ class CNNbLSTM_ESM1b_All(ModelBase):
             lstm_layers: amount of bidirectional lstm layers
             language_model: path to language model weights
         """
-        super(CNNbLSTM_ESM1b_All, self).__init__()
+        super(CNNbLSTM_ESM1b_Complete, self).__init__()
 
-        self.embedding = ESM1bEmbedding(language_model, **kwargs)
+        # ESM1b block
+        self.embedding = ESM1bEmbedding(embedding_args, embedding_pretrained, **kwargs)
 
         # CNN blocks
         self.conv = nn.ModuleList()
@@ -163,7 +164,6 @@ class CNNbLSTM_ESM1b_All(ModelBase):
         
     def forward(self, x: torch.tensor, mask: torch.tensor) -> list:
         """ Forwarding logic """
-
         max_length = x.size(1)
 
         x = self.embedding(x, max(mask))

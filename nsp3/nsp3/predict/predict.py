@@ -16,7 +16,7 @@ class SecondaryFeatures(object):
             model_data: file directory to saved model
         """
         self.model = model
-        model_data = torch.load(model_data)
+        model_data = torch.load(model_data, map_location ='cpu')
         self.model.load_state_dict(model_data['state_dict'])
         self.model.eval()
 

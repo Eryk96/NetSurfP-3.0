@@ -7,16 +7,18 @@ import pdb
 import esm
 import math
 import argparse
+from argparse import Namespace
 
 class ESM1bEmbedding(nn.Module):
     """ ESM1b embedding layer module """
 
-    def __init__(self, model_path: str, ft_embed_tokens: bool = False, ft_transformer: bool = False, ft_contact_head: bool = False,
+    def __init__(self, embedding_args: dict, embedding_pretrained=None, ft_embed_tokens: bool = False, ft_transformer: bool = False, ft_contact_head: bool = False,
                  ft_embed_positions: bool = False, ft_emb_layer_norm_before: bool = False, ft_emb_layer_norm_after: bool = False, 
                  ft_lm_head: bool = False, max_embedding: int = 1024, offset: int = 200):
         """ Constructor
         Args:
-            model_path: path to language model
+            embedding_args: arguments to embeddings model
+            embedding_pretrained: patht to pretrained model
             ft_embed_tokens: finetune embed tokens layer
             ft_transformer: finetune transformer layer
             ft_contact_head: finetune contact head
@@ -30,7 +32,14 @@ class ESM1bEmbedding(nn.Module):
         super(ESM1bEmbedding, self).__init__()
 
         # configure pre-trained model
-        self.model, _ = esm.pretrained.load_model_and_alphabet_local(model_path)
+        alphabet = esm.Alphabet.from_architecture(embedding_args['arch'])
+        model_type = esm.ProteinBertModel
+
+        self.model = model_type(Namespace(**embedding_args), alphabet,)
+        
+        # if given model path then pretrain
+        if embedding_pretrained:
+            self.model, _ = esm.pretrained.load_model_and_alphabet_local(embedding_pretrained)
 
         self.max_embedding = max_embedding
         self.offset = offset

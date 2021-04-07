@@ -88,6 +88,11 @@ def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
         model_data: path to trained model
         input_data: file path or raw data input
     """
+    # dont use any pretrained models
+    if "embedding_pretrained" in cfg['arch']['args']:
+        cfg['arch']['args'].pop("embedding_pretrained")
+
+    # load model and predict
     model = get_instance(module_arch, 'arch', cfg)
     pred = getattr(module_pred, pred_name)(model, model_data)
     result = pred(input_data)
