@@ -24,7 +24,7 @@ class Trainer(TrainerBase):
         """ Training logic for an epoch
         Args:
             epoch: current epoch
-        Returns :
+        Returns:
             dictionary containing results for the epoch.
         """
         
@@ -36,8 +36,6 @@ class Trainer(TrainerBase):
         for batch_idx, (data, target, mask) in enumerate(self.data_loader):
             if self.batch_transform:
                 data = self.batch_transform(data)
-
-            breakpoint()
 
             data, target = data.to(self.device), target.to(self.device)
 

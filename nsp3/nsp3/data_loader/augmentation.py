@@ -41,7 +41,7 @@ class SparseToString(object):
         batches = x.shape[0]
         for i in range(batches):
             sequence = "".join(
-                map(lambda r: self.translate[r.item()], x[i])).rstrip("X")
+                map(lambda r: self.translate[r.item()], x[i]))
             sequences.append(("protein_" + str(i), sequence))
 
         return sequences

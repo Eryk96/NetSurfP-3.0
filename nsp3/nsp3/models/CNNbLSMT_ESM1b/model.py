@@ -69,7 +69,7 @@ class CNNbLSTM_ESM1b(ModelBase):
 
         max_length = x.size(1)
 
-        x = self.embedding(x)
+        x = self.embedding(x, max(mask))
         x = x.permute(0,2,1)
 
         # concatenate channels from residuals and input + batch norm
@@ -166,7 +166,7 @@ class CNNbLSTM_ESM1b_All(ModelBase):
 
         max_length = x.size(1)
 
-        x = self.embedding(x)
+        x = self.embedding(x, max(mask))
         x = x.permute(0,2,1)
     
         # concatenate channels from residuals and input + batch norm

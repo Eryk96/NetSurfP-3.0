@@ -59,7 +59,7 @@ class ESM1b(ModelBase):
     def forward(self, x: torch.tensor, mask: torch.tensor) -> torch.tensor:
         """ Forwarding logic """
 
-        x = self.embedding(x)
+        x = self.embedding(x, max(mask))
 
         # hidden neurons to classes
         ss8 = self.ss8(x)

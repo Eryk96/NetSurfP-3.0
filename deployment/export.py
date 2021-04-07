@@ -2,6 +2,8 @@ import esm
 import torch
 import nsp3.models as module_arch
 
+from nsp3.data_loader.augmentation import string_token
+
 from nsp3.main import get_instance
 
 def export(experiment: dict, weights: str):
@@ -13,8 +15,11 @@ def export(experiment: dict, weights: str):
     model.eval()
 
     example_input = [("protein", "GLLQVATERYVGDEIERQLDDYGLGDVVNPTTPGALHINFSILCTYSMHEHRMPVEPPDV")]
+    mask = torch.tensor([len(protein[1]) for protein in example_input])
+    example_input = string_token()(example_input)
 
-    traced_model = torch.jit.trace(model, batch_tokens)
+    traced_model = torch.jit.script(model)
+    print(traced_model.code)
     traced_model.save("deployment/export.pt")
 
     print("Model exported succesfully. Saved as deployment/export.pt")

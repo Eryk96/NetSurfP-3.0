@@ -15,6 +15,7 @@ import nsp3.data_loader.data_loaders as module_data
 import nsp3.models.loss as module_loss
 import nsp3.models.metric as module_metric
 import nsp3.models as module_arch
+import nsp3.predict as module_pred
 
 from nsp3.trainer import Trainer
 from nsp3.eval import Evaluate
@@ -77,6 +78,19 @@ def train(cfg: dict, resume: str):
         evaluation.evaluate()
 
     log.info('Finished!')
+
+
+def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
+    """ Predict using trained model and file or string input
+    Args:
+        cfg: configuration of model
+        pred_name: name of the prediction class
+        model_data: path to trained model
+        input_data: file path or raw data input
+    """
+    model = get_instance(module_arch, 'arch', cfg)
+    pred = getattr(module_pred, pred_name)(model, model_data)
+    result = pred(input_data)
 
 
 def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:

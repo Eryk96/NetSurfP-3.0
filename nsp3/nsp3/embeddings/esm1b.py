@@ -30,8 +30,7 @@ class ESM1bEmbedding(nn.Module):
         super(ESM1bEmbedding, self).__init__()
 
         # configure pre-trained model
-        self.model, alphabet = esm.pretrained.load_model_and_alphabet_local(model_path)
-        self.batch_converter = alphabet.get_batch_converter()
+        self.model, _ = esm.pretrained.load_model_and_alphabet_local(model_path)
 
         self.max_embedding = max_embedding
         self.offset = offset
@@ -46,12 +45,18 @@ class ESM1bEmbedding(nn.Module):
                 for param in child.parameters():
                     param.requires_grad = False
 
-    def forward(self, x: torch.tensor, padding_length: int = None) -> torch.tensor:
+    def forward(self, batch_tokens: torch.tensor, padding_length: int = None) -> torch.tensor:
         """ Convert tokens to embeddings
         Args:
-            x: tensor with sequence tokens
+            batch_tokens: tensor with sequence tokens
         """
-        batch_sequences, batch_residues = batch_tokens.shape
+        batch_residues_original = batch_tokens.shape[1]
+
+        # remove padding
+        if padding_length:
+            batch_tokens = batch_tokens[:, :padding_length]
+
+        batch_residues = batch_tokens.shape[1]
 
         embedding = self.model(batch_tokens[:, :self.max_embedding], repr_layers=[33])[
                                "representations"][33]
@@ -69,8 +74,8 @@ class ESM1bEmbedding(nn.Module):
 
         # add padding
         if padding_length:
-            embedding = F.pad(embedding, pad=(0, 0, 0, padding_length
-                            - embedding.shape[1]), mode='constant', value=0)
+            embedding = F.pad(embedding, pad=(0, 0, 0, batch_residues_original
+                            - padding_length), mode='constant', value=0)
 
         # cleanup
         del batch_tokens
