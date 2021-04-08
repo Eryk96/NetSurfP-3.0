@@ -1,9 +1,10 @@
-models
-data
-notebooks
-nsp2
-nsp3/saved
-sh
+models/*
+data/*
+notebooks/*
+nsp2/*
+nsp3/saved/*
+saved/*
+sh/*
 
 # unignore the wanted model
-!nsp3/saved/nsp3/CNNbLSTM/CNNbLSTM/0331-180508/model_best.pth
+!saved/nsp3/CNNbLSTM/CNNbLSTM/0331-180508/model_best.pth

@@ -1,10 +1,11 @@
+import warnings
+
 try:
     from torch.utils.tensorboard import SummaryWriter
 except ImportError:
-    raise ImportError(
-        "Import `from torch.utils.tensorboard import SummaryWriter` failed."
-        "Ensure PyTorch version >= 1.1 and Tensorboard > 1.14 are installed."
-    )
+    warnings.warn("Import `from torch.utils.tensorboard import SummaryWriter` \
+        failed. Ensure PyTorch version >= 1.1 and Tensorboard > 1.14 are installed. \
+             Training wont work", ImportWarning)
 
 
 class TensorboardWriter:
