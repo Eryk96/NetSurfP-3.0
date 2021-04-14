@@ -63,17 +63,24 @@ class SecondaryFeatures(object):
         Args:
             x: model predictions
         """
+        # convert phi and psi radians to angles
         for i in range(x[0].shape[0]):
-            print("SS8", x[0][i])
-            print("SS3", x[1][i])
-            print("disorder", x[2][i])
-            print("rsa", x[3][i])
-            print("phi", arctan_dihedral(x[4][i][:, 0], x[4][i][:, 1]))
-            print("psi", arctan_dihedral(x[5][i][:, 0], x[5][i][:, 1]))
+            x[4][i, :, 0] = arctan_dihedral(x[4][i][:, 0], x[4][i][:, 1])
+            x[5][i, :, 0] = arctan_dihedral(x[5][i][:, 0], x[5][i][:, 1])
+
+        x[4] = x[4][:, :, 0]
+        x[5] = x[5][:, :, 0]
+
+        return x
 
     def __call__(self, x):
         """ Prediction call logic """
-        x, mask = self.preprocessing(x)
-        x = self.inference(x, mask)
+        fasta, mask = self.preprocessing(x)
+        x = self.inference(fasta, mask)
         x = self.postprocessing(x)
-        return x
+
+        identifier = [element[0] for element in fasta]
+        sequence = [element[1] for element in fasta]
+        prediction = [x[i][:] for i in range(x[0].shape[0])]
+
+        return zip(*[*identifier, *sequence, *prediction])

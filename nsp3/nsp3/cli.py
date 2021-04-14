@@ -32,7 +32,7 @@ def train(config_filename: str, resume: str):
 
 
 @cli.command()
-@click.option('-c', '--config-filename', default=['experiments/config.yml'], help='Path to model configuration file.')
+@click.option('-c', '--config-filename', default=['config.yml'], help='Path to model configuration file.')
 @click.option('-d', '--model_data', default='model.pth', type=str, help='Path to model data')
 @click.option('-i', '--input_data', default=None, type=str, help='Path to input data')
 @click.option('-p', '--pred_name', default="SecondaryFeatures", type=str, help='Name of the prediction class')

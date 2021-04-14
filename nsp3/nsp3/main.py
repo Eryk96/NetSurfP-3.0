@@ -97,6 +97,8 @@ def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
     pred = getattr(module_pred, pred_name)(model, model_data)
     result = pred(input_data)
 
+    return result
+
 
 def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
     """ Setup GPU device if available, move model into configured device
