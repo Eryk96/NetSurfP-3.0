@@ -1,5 +1,6 @@
 import sys
 import torch
+import torch.nn.functional as F
 
 from io import StringIO
 from Bio import SeqIO
@@ -65,11 +66,15 @@ class SecondaryFeatures(object):
         """
         # convert phi and psi radians to angles
         for i in range(x[0].shape[0]):
+            x[0][i] = F.softmax(x[0][i], dim=1)
+            x[1][i] = F.softmax(x[1][i], dim=1)
+            x[2][i] = F.softmax(x[2][i], dim=1)
+            
             x[4][i, :, 0] = arctan_dihedral(x[4][i][:, 0], x[4][i][:, 1])
             x[5][i, :, 0] = arctan_dihedral(x[5][i][:, 0], x[5][i][:, 1])
 
-        x[4] = x[4][:, :, 0]
-        x[5] = x[5][:, :, 0]
+        x[4] = x[4][:, :, 0].unsqueeze(2)
+        x[5] = x[5][:, :, 0].unsqueeze(2)
 
         return x
 
@@ -81,6 +86,6 @@ class SecondaryFeatures(object):
 
         identifier = [element[0] for element in fasta]
         sequence = [element[1] for element in fasta]
-        prediction = [x[i][:] for i in range(x[0].shape[0])]
+        prediction = [x[i].detach().numpy() for i in range(len(x))]
 
-        return zip(*[*identifier, *sequence, *prediction])
+        return identifier, sequence, prediction

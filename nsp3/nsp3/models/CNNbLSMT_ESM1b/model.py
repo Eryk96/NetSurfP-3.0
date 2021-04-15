@@ -164,7 +164,8 @@ class CNNbLSTM_ESM1b_Complete(ModelBase):
         
     def forward(self, x: torch.tensor, mask: torch.tensor) -> list:
         """ Forwarding logic """
-        max_length = x.size(1)
+        # remove start and end token from length
+        max_length = x.size(1) - 2
 
         x = self.embedding(x, max(mask))
         x = x.permute(0,2,1)

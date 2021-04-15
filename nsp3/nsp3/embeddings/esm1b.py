@@ -89,7 +89,7 @@ class ESM1bEmbedding(nn.Module):
         del batch_tokens
         torch.cuda.empty_cache()
 
-        return embedding
+        return embedding[:, 1:embedding.shape[1]-1, :]
 
 
 if __name__ == '__main__':
