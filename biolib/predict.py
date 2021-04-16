@@ -62,4 +62,4 @@ for i in range(len(identifiers)):
                   df['q3'].values, df['rsa'], df['disorder(p_t)'].values)
 
     print("#### " + identifiers[i])
-    print("![image]({})".format(identifiers[i] + '.png'))
+    print("![image]({})".format(filename + '.png'))
