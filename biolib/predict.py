@@ -5,10 +5,11 @@ import re
 
 from nsp3 import main
 from nsp3.cli import load_config
+from visualization import plot_features
 
 # read inputs provided by user
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_data')
+parser.add_argument('--input_data', dest="input_data")
 args = parser.parse_args()
 
 #config = load_config(
@@ -16,8 +17,8 @@ args = parser.parse_args()
 #result = main.predict(config, "SecondaryFeatures",
 #                      "/home/eryk/development/NSPThesis/saved/nsp3/CNNbLSTM/CNNbLSTM/0331-180508/model_best.pth", args.input_data)
 
-config = load_config("config.yml")
-result = main.predict(config, "SecondaryFeatures", "model_best.pth", args.input_data)
+config = load_config("/config.yml")
+result = main.predict(config, "SecondaryFeatures", "/model.pth", args.input_data)
 
 Q8, Q3 = ("GHIBESTC", "HEC")
 
@@ -51,9 +52,14 @@ for i in range(len(identifiers)):
     df = np.concatenate([df, df_q3], axis=1)
 
     df = pd.DataFrame(df)
-    df.to_csv(get_valid_filename(
-        identifiers[i]) + '.csv', header=CSV_header)
+    df = df.set_axis(CSV_header, axis=1, inplace=False)
 
-    print(identifiers[i])
-    print("=======")
-    print("[CSV]({})".format(identifiers[i] + '.csv'))
+    filename = get_valid_filename(identifiers[i])
+
+    df.to_csv(filename + '.csv')
+
+    plot_features(filename, df['residue'].values,
+                  df['q3'].values, df['rsa'], df['disorder(p_t)'].values)
+
+    print("#### " + identifiers[i])
+    print("![image]({})".format(identifiers[i] + '.png'))

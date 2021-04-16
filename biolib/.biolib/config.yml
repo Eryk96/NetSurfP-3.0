@@ -12,9 +12,11 @@ modules:
             - COPY / /home/biolib/
 arguments:
     -
-        default_value: ''
+        default_value: 'dummy.txt'
         description: Insert fasta sequence(s)
-        key: '--fasta-file'
+        key: '--input_data'
         key_value_separator: ' '
         required: true
         type: file
+
+output_type: markdown
