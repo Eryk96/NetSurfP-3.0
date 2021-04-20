@@ -4,6 +4,9 @@ import torch.nn.functional as F
 import numpy as np
 import esm
 import math
+import h5py
+
+from nsp3.data_loader.augmentation import sparse_token
 
 import argparse
 from argparse import Namespace
@@ -30,15 +33,15 @@ class ESM1bEmbedding(nn.Module):
         """
         super(ESM1bEmbedding, self).__init__()
 
-        # configure pre-trained model
-        alphabet = esm.Alphabet.from_architecture(embedding_args['arch'])
-        model_type = esm.ProteinBertModel
-
-        self.model = model_type(Namespace(**embedding_args), alphabet,)
-        
         # if given model path then pretrain
         if embedding_pretrained:
             self.model, _ = esm.pretrained.load_model_and_alphabet_local(embedding_pretrained)
+        else:
+            # configure pre-trained model
+            alphabet = esm.Alphabet.from_architecture(embedding_args['arch'])
+            model_type = esm.ProteinBertModel
+
+            self.model = model_type(Namespace(**embedding_args), alphabet,)
 
         self.max_embedding = max_embedding
         self.offset = offset
@@ -114,11 +117,12 @@ if __name__ == '__main__':
             "dataset", (sequences, residues, classes + EMBEDDING_SIZE), dtype="float64", compression="gzip", compression_opts=9)
         augmented_dataset[:sequences, :residues, :classes] = dataset
 
-        decoded_sequences = decode_to_protein_sequence(dataset)
+        decoded_sequences = sparse_token()(torch.from_numpy(dataset[:, :, :20]))
+        print("Decoded sequences")
 
         with torch.no_grad():
             # Create embedding model
-            model = ESM1bEmbedding(model_path)
+            model = ESM1bEmbedding({}, embedding_pretrained=model_path)
 
             # Try to move model to GPU if possible
             device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -149,7 +153,7 @@ if __name__ == '__main__':
 
                     # store embedding model
                     embedding_model = model(
-                        decoded_sequences[i + j:i + j + mini_batch - offset]).cpu().detach().numpy()
+                        decoded_sequences[i + j:i + j + mini_batch - offset].to(device)).cpu().detach().numpy()
 
                     # store embedding without the extra start and end token
                     embedding_residues = embedding_model.shape[1]

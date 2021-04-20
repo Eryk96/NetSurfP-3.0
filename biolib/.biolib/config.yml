@@ -12,7 +12,7 @@ modules:
             - COPY / /home/biolib/
 arguments:
     -
-        default_value: 'dummy.txt'
+        default_value: 'example.txt'
         description: Insert fasta sequence(s)
         key: '--input_data'
         key_value_separator: ' '
