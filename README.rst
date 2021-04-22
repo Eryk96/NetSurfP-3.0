@@ -75,7 +75,7 @@ Or develop further the project. This will create a symbolic link to the package.
 
 .. code-block::
 
-  $ pyt install develop
+  $ python setup.py develop
 
 Training a model based on a experiment configuration (includes evaluating in the end with best model)
 
