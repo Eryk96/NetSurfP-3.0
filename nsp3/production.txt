@@ -10,3 +10,4 @@ typing-extensions==3.7.4.3
 pandas==1.2.3
 scipy==1.6.2
 matplotlib==3.4.1
+h5py==3.2.1

@@ -17,50 +17,33 @@ Folder Structure
   │
   ├── nsp3/
   │    │
+  │    ├── logging.yml - logging configuration
   │    ├── cli.py - command line interface
   │    ├── main.py - main script to start train/test
   │    │
   │    ├── base/ - abstract base classes
-  │    │   ├── base_data_loader.py - abstract base class for data loaders
-  │    │   ├── base_model.py - abstract base class for models
-  │    │   └── base_trainer.py - abstract base class for trainers
   │    │
   │    ├── data_loader/ - anything about data loading goes here
-  │    │   ├── augmentation.py
-  │    │   ├── dataset_loaders.py
-  │    │   └── data_loaders.py
   │    │
-  │    ├── embeddings/ - file with the implemented embeddings
-  │    │   └──esmb1.py
+  │    ├── embeddings/ - folder containing the ESM1b model
   │    │
   │    ├── models/ - models, losses, and metrics
-  │    │   └──CNNbLSTM
-  │    │   │  ├── loss.py
-  │    │   │  ├── metric.py
-  │    │   │  └── model.py
-  │    │   │
-  │    │   └──CNNTrans
-  │    │      ├── loss.py
-  │    │      ├── metric.py
-  │    │      └── model.py
+  │    │
+  │    ├── experiments/ - directory for storing configuration files
   │    │
   │    ├── trainer/ - trainers
-  │    │   └── trainer.py
   │    │
-  │    └── utils/
-  │        ├── logger.py - class for train logging
-  │        ├── visualization.py - class for Tensorboard visualization support
-  │        └── saving.py - manages pathing for saving models + logs
+  │    ├── eval/ - evaluators
+  │    │
+  │    ├── predict/ - predictors
+  │    │
+  │    └── utils/ - utilities for logging and tensorboard visualization
   │
   ├── nsp2/* - Previous version of netsurfp (Keras framework)
-  │
-  ├── logging.yml - logging configuration
   │
   ├── data/ - directory for storing input data
   │
   ├── study/ - directory for storing optuna studies
-  │
-  ├── experiments/ - directory for storing configuration files
   │
   ├── models/ - directory for storing pre-trained models
   │
@@ -68,24 +51,43 @@ Folder Structure
   │
   ├── saved/ - directory for checkpoints and logs
   │
+  ├── biolib/ - directory for deploying to biolib
+  │
   └── tests/ - tests folder
 
 
 Usage
 =====
-
+Start by creating an enviroment to install the project requirements
 .. code-block::
 
   $ conda env create --file environment.yml
   $ conda activate nsp3
 
-The code in this repo is an MNIST example of the template. You can run the tests,
-and the example project using:
+Now you can either use the package out of the box
 
 .. code-block::
 
-  $ pytest tests
+  $ cd nsp3
+  $ python setup.py install
+
+Or develop further the project. This will create a symbolic link to the package. Changes to the source code will be automatically applied.
+
+.. code-block::
+
+  $ pyt install develop
+
+Training a model based on a experiment configuration (includes evaluating in the end with best model)
+
+.. code-block::
+
   $ nsp3 train -c experiments/config.yml
+
+Predicting, which uses a model, its configuration and a predictor class
+.. code-block::
+
+  $ nsp3 predict -c config.yml -d model.pth -p "SecondaryFeatures" -i example_input.txt
+
 
 Config file format
 ------------------
@@ -93,60 +95,87 @@ Config files are in `.yml` format:
 
 .. code-block:: HTML
 
-   name: NetsurfP2_CNNbLSTM_HHBlits
-   save_dir: saved/NetsurfP2_CNNbLSTM_HHBlits/
-   seed: 1234
-   target_devices: [0]
-
-   arch:
-     type: CNNbLSTM
-     args:
-       init_n_channels: 50
-       out_channels: 32
-       cnn_layers: 2
-       kernel_size: [129, 257]
-       padding: [64, 128]
-       n_hidden: 50
-       dropout: 0.5
-       lstm_layers: 2
-
-   dataset_loader:
-     type: NSPData
-
-   data_loader:
-     type: NSPDataLoader
-     args:
-       batch_size: 15
-       file: ../data/nsp2/training_data/Train_HHBlits.npz
-       nworkers: 2
-       shuffle: true
-       validation_split: 0.05
-
-   loss: multi_task_loss
-
-   metrics:
-   - metric_ss8
-   - metric_ss3
-   - metric_dis_mcc
-   - metric_dis_fpr
-   - metric_rsa
-   - metric_asa
-   - metric_phi
-   - metric_psi
-
-   optimizer:
-     type: Adam
-     args:
-       lr: 5e-3
-       weight_decay: 0
-
-   training:
-     early_stop: 3
-     epochs: 100
-     monitor: min val_loss
-     save_period: 1
-     tensorboard: true
-
+    name: CNNbLSTM
+    save_dir: saved/nsp3/CNNbLSTM/
+    seed: 1234
+    target_devices: [0]
+    
+    arch:
+      type: CNNbLSTM_ESM1b_Complete
+      args:
+        init_n_channels: 1280
+        out_channels: 32
+        cnn_layers: 2
+        kernel_size: [129, 257]
+        padding: [64, 128]
+        n_hidden: 1024
+        dropout: 0.5
+        lstm_layers: 2
+        embedding_args:
+          arch: roberta_large
+          dropout: 0.0
+          attention_dropout: 0.0
+          activation_dropout: 0.0
+          ffn_embed_dim: 5120
+          layers: 33
+          attention_heads: 20
+          embed_dim: 1280
+          max_positions: 1024
+          learned_pos: true
+          activation_fn: gelu
+          use_bert_init: true
+          normalize_before: true
+          preact_normalize: true
+          normalize_after: true
+          token_dropout: true
+          no_seed_provided: false
+          pooler_activation_fn: 'tanh'
+          pooler_dropout: 0.0
+          checkpoint_transformer_block: false
+          untie_weights_roberta: false
+        embedding_pretrained: "../models/esm1b_t33_650M_UR50S.pt"
+    
+    data_loader:
+      type: NSPDataLoader
+      args:
+        train_path: [../data/nsp2/training_data/Train_HHblits_small.npz]
+        test_path: [../data/nsp2/training_data/CASP12_HHblits.npz, 
+                    ../data/nsp2/training_data/CB513_HHblits.npz, 
+                    ../data/nsp2/training_data/TS115_HHblits.npz]
+        dataset_loader: NSPDataOnlyEncoding
+        batch_size: 15
+        nworkers: 2
+        shuffle: true
+        validation_split: 0.05
+    
+    loss: multi_task_loss
+    
+    metrics:
+      metric_ss8: 0
+      metric_ss3: 1
+      metric_dis_mcc: 2
+      metric_dis_fpr: 2
+      metric_rsa: 3
+      metric_asa: 3
+      metric_phi: 4
+      metric_psi: 5
+    
+    optimizer:
+      type: Adam
+      args:
+        lr: 0.0005
+        weight_decay: 0
+    
+    lr_scheduler: 
+      type: null
+    
+    training:
+      early_stop: 3
+      epochs: 100
+      monitor: min val_loss
+      save_period: 1
+      tensorboard: true
+    
 
 Add addional configurations if you need.
 
@@ -156,7 +185,7 @@ Modify the configurations in `.yml` config files, then run:
 
 .. code-block::
 
-  $ nsp3 train -c experiments/config.yml
+  $ nsp3 train -c experiments/<config>.yml
 
 Resuming from checkpoints
 -------------------------
@@ -164,7 +193,7 @@ You can resume from a previously saved checkpoint by:
 
 .. code-block::
 
-  nsp3 train -c experiments/config.yml -r path/to/checkpoint
+  nsp3 train -c experiments/<config>.yml -r path/to/checkpoint
 
 Checkpoints
 -----------
@@ -172,7 +201,7 @@ You can specify the name of the training session in config files:
 
 .. code-block:: HTML
 
-  "name": "NetsurfP2_CNNbLSTM_HHBlits"
+  "name": "CNNbLSTM"
 
 The checkpoints will be saved in `save_dir/name/timestamp/checkpoint_epoch_n`, with timestamp in
 mmdd_HHMMSS format.
@@ -212,8 +241,3 @@ this template are basically wrappers for those of `tensorboard.SummaryWriter` mo
 
 **Note**: You don't have to specify current steps, since `TensorboardWriter` class defined at
 `logger/visualization.py` will track current steps.
-
-Acknowledgments
-===============
-This project was created using
-`Cookiecutter PyTorch <https://github.com/khornlund/cookiecutter-pytorch>`_
