@@ -53,6 +53,8 @@ Folder Structure
   │
   ├── biolib/ - directory for deploying to biolib
   │
+  ├── sh/ - directory for running code on computerome
+  │
   └── tests/ - tests folder
 
 
