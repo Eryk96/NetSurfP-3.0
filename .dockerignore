@@ -6,5 +6,6 @@ nsp3/saved/*
 saved/*
 sh/*
 
+
 # unignore the wanted model
 !saved/nsp3/CNNbLSTM/CNNbLSTM/0331-180508/model_best.pth
