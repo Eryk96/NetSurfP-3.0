@@ -49,7 +49,7 @@ class ESM1b(ModelBase):
 
     def parameters(self, recurse: bool = True) -> list:
         """ Returns the parameters to learn """
-        
+
         log.info("Params to learn:")
         for name, param in self.named_parameters(recurse=recurse):
             if param.requires_grad == True:

@@ -11,6 +11,7 @@ from nsp3.data_loader.augmentation import sparse_token
 import argparse
 from argparse import Namespace
 
+
 class ESM1bEmbedding(nn.Module):
     """ ESM1b embedding layer module """
 

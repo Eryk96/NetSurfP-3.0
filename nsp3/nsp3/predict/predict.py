@@ -5,22 +5,19 @@ import torch.nn.functional as F
 from io import StringIO
 from Bio import SeqIO
 
+from nsp3.base.base_predict import BasePredict
 from nsp3.data_loader.augmentation import string_token
 from nsp3.models.metric import arctan_dihedral
 
-class SecondaryFeatures(object):
+class SecondaryFeatures(BasePredict):
 
     def __init__(self, model, model_data):
-        """ Constructor, Load the model and prepare it for predicting
+        super(SecondaryFeatures).__init__(model, model_data)
+        """ Predict secondary features by using raw AA sequence
         Args:
-            cfg: model configuration
-            model_data: file directory to saved model
+            model: instantiated model class
+            model_data: path to the trained model data
         """
-        self.model = model
-        model_data = torch.load(model_data, map_location ='cpu')
-        self.model.load_state_dict(model_data['state_dict'])
-        self.model.eval()
-
         self.transform = string_token()
 
     def preprocessing(self, x) -> list:

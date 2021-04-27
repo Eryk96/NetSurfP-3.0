@@ -9,7 +9,7 @@ class Evaluate(EvaluateBase):
     """ Responsible for test evaluation and the metrics. """
 
     def __init__(self, model: nn.Module, metrics: list, metrics_task: list, device: torch.device,
-            test_data_loader: list, checkpoint_dir: str, writer_dir: str):
+            test_data_loader: list, batch_transform: callable, checkpoint_dir: str, writer_dir: str):
         super().__init__(model, metrics, metrics_task, checkpoint_dir, writer_dir, device)
         """ Constructor
         Args:
@@ -24,6 +24,7 @@ class Evaluate(EvaluateBase):
         
         self.path = test_data_loader[0]
         self.test_data_loader = test_data_loader[1]
+        self.batch_transform = batch_transform
     
     def _evaluate_epoch(self) -> dict:
         """ Evaluation of test """
@@ -34,6 +35,8 @@ class Evaluate(EvaluateBase):
         # get test evaluation from metrics
         with torch.no_grad():
             for batch_idx, (data, target, mask) in enumerate(self.test_data_loader):
+                if self.batch_transform:
+                    data = self.batch_transform(data)
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data, mask)
                 for mtr, value in zip(metric_mtrs, self._eval_metrics(output, target)):

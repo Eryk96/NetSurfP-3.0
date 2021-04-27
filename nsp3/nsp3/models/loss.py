@@ -15,7 +15,7 @@ def mse(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor) -> torc
     return torch.sum(loss) / torch.sum(mask)
 
 
-def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor) -> torch.tensor:
+def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tensor, weights: torch.tensor = None) -> torch.tensor:
     """ Returns cross entropy loss using masking
     Args:
         outputs: tensor with predictions
@@ -23,12 +23,12 @@ def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tenso
         mask: tensor with masking
     """
     labels = labels.clone()
-    labels[mask == 0] = -999
+    labels[mask == 0] = -1
 
-    return nn.CrossEntropyLoss(ignore_index=-999)(outputs, labels.long())
+    return nn.CrossEntropyLoss(ignore_index=-1, weight=weights)(outputs, labels.long())
 
 
-def ss8(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+def ss8(outputs: torch.tensor, labels: torch.tensor, weights: torch.tensor = None) -> torch.tensor:
     """ Returns SS8 loss
     Args:
         outputs: tensor with SS8 predictions
@@ -58,7 +58,7 @@ def ss3(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     return cross_entropy(outputs, labels, mask)
 
 
-def disorder(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+def disorder(outputs: torch.tensor, labels: torch.tensor, weights: torch.tensor = None) -> torch.tensor:
     """ Returns disorder loss
     Args:
         outputs: tensor with disorder predictions
@@ -146,8 +146,10 @@ def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor
 
     return loss.sum()
 
-def secondary_structure_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
-    """ Returns a weighted double task loss for secondary structure. 
+
+def multi_task_remapped(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+    """ Returns a weighted multi task loss. 
+        Combines ss8, ss3, disorder, rsa, phi and psi loss.
     Args:
         outputs: tensor with psi predictions
         labels: tensor with labels
@@ -157,6 +159,27 @@ def secondary_structure_loss(outputs: torch.tensor, labels: torch.tensor) -> tor
     disorder_mask = labels[:, :, 1]
     unknown_mask = labels[:, :, -1]
 
+    s8_class_weights = torch.tensor(
+        [3.319, 1.137, 5.275, 4.651, 1.595, 2.578, 2.28, 1.398], device=labels.device)
+
+    # weighted losses
+    _ss8 = ss8(outputs[0], labels) * 1
+    _dis = disorder(outputs[1], labels) * 5
+    _rsa = rsa(outputs[2], labels) * 100
+    _phi = phi(outputs[3], labels) * 5
+    _psi = psi(outputs[4], labels) * 5
+
+    loss = torch.stack([_ss8, _dis, _rsa, _phi, _psi])
+
+    return loss.sum()
+
+
+def secondary_structure_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+    """ Returns a weighted double task loss for secondary structure. 
+    Args:
+        outputs: tensor with psi predictions
+        labels: tensor with labels
+    """
     # weighted losses
     _ss8 = ss8(outputs[0], labels) * 1
     _ss3 = ss3(outputs[1], labels) * 5

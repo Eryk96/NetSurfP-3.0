@@ -74,6 +74,7 @@ def train(cfg: dict, resume: str):
                                 device=device,
                                 test_data_loader=_test_data_loader,
                                 checkpoint_dir=trainer.checkpoint_dir,
+                                batch_transform=transforms,
                                 writer_dir=trainer.writer_dir)
         evaluation.evaluate()
 

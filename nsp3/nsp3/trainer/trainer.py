@@ -136,6 +136,8 @@ class Trainer(TrainerBase):
         # loss and metrics of validation data 
         with torch.no_grad():
             for batch_idx, (data, target, mask) in enumerate(self.valid_data_loader):
+                if self.batch_transform:
+                    data = self.batch_transform(data)
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data, mask)
                 loss = self.loss(output, target)
