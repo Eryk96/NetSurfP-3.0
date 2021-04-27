@@ -9,7 +9,7 @@ data_redundancy.ipynb
 /models/prot_t5_xl_bfd/*
 *.pt
 
-nsp3/experiments/tests
+experiments/test
 
 
 # dont include data
