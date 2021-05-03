@@ -22,10 +22,9 @@ def cross_entropy(outputs: torch.tensor, labels: torch.tensor, mask: torch.tenso
         labels: tensor with labels
         mask: tensor with masking
     """
-    labels = labels.clone()
-    labels[mask == 0] = -1
 
-    return nn.CrossEntropyLoss(ignore_index=-1, weight=weights)(outputs, labels.long())
+    loss = nn.CrossEntropyLoss(reduction='none')(outputs, labels)*mask
+    return torch.sum(loss) / torch.sum(mask)
 
 
 def ss8(outputs: torch.tensor, labels: torch.tensor, weights: torch.tensor = None) -> torch.tensor:
@@ -67,7 +66,7 @@ def disorder(outputs: torch.tensor, labels: torch.tensor, weights: torch.tensor 
     mask = get_mask(labels)
 
     labels = labels[:, :, 1].unsqueeze(2)
-    labels = torch.argmax(torch.cat([labels, 1 - labels], dim=2), dim=2)
+    labels = torch.argmax(torch.cat([labels, 1.0 - labels], dim=2), dim=2)
 
     outputs = outputs.permute(0, 2, 1)
 
@@ -129,11 +128,6 @@ def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor
         outputs: tensor with psi predictions
         labels: tensor with labels
     """
-    # filters
-    zero_mask = labels[:, :, 0]
-    disorder_mask = labels[:, :, 1]
-    unknown_mask = labels[:, :, -1]
-
     # weighted losses
     _ss8 = ss8(outputs[0], labels) * 1
     _ss3 = ss3(outputs[1], labels) * 5
@@ -154,14 +148,6 @@ def multi_task_remapped(outputs: torch.tensor, labels: torch.tensor) -> torch.te
         outputs: tensor with psi predictions
         labels: tensor with labels
     """
-    # filters
-    zero_mask = labels[:, :, 0]
-    disorder_mask = labels[:, :, 1]
-    unknown_mask = labels[:, :, -1]
-
-    s8_class_weights = torch.tensor(
-        [3.319, 1.137, 5.275, 4.651, 1.595, 2.578, 2.28, 1.398], device=labels.device)
-
     # weighted losses
     _ss8 = ss8(outputs[0], labels) * 1
     _dis = disorder(outputs[1], labels) * 5

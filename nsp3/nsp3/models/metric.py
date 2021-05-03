@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import numpy as np
 
 
@@ -9,6 +10,8 @@ def get_mask(labels: torch.tensor, use_disorder_mask: bool = False, use_unknown_
         use_disorder_mask: apply disorder mask
         use_unknown_mask: apply unknown nucleotide mask
     """
+    labels = labels.clone()
+
     evaluation_mask = labels[:, :, 2]
     zero_mask = labels[:, :, 0] * evaluation_mask
     disorder_mask = labels[:, :, 1]
@@ -78,7 +81,12 @@ def mcc(pred: torch.tensor, labels: torch.tensor) -> float:
     fn = sum((pred == 0) & (labels == 1))
     tn = sum((pred == 0) & (labels == 0))
 
-    return ((tp * tn - fp * fn) / torch.sqrt(((tp + fp) * (fn + tn) * (tp + fn) * (fp + tn)).float())).item()
+    mcc = (tp * tn - fp * fn) / torch.sqrt(((tp + fp) * (fn + tn) * (tp + fn) * (fp + tn)).float())
+
+    if torch.isnan(mcc):
+        return 0
+
+    return mcc.item()
 
 
 def pcc(pred: torch.tensor, labels: torch.tensor) -> float:
@@ -142,6 +150,22 @@ def metric_ss3(outputs: torch.tensor, labels: torch.tensor) -> float:
 
     return accuracy(outputs, labels)
 
+def metric_ss3_from_ss8(outputs: torch.tensor, labels: torch.tensor) -> float:
+    """ Returns SS3 metric
+    Args:
+        outputs: tensor with predicted values
+        labels: tensor with correct values
+    """
+    mask = get_mask(labels)
+
+    structure_mask = torch.tensor([0, 0, 0, 1, 1, 2, 2, 2]).to(labels.device)
+
+    labels = torch.max(labels[:, :, 7:15] * structure_mask, dim=2)[0].long()[mask == 1]
+    
+    outputs = F.one_hot(torch.argmax(outputs, dim=2), num_classes=8)
+    outputs = torch.max(outputs * structure_mask, dim=2)[0].long()[mask == 1]
+
+    return accuracy(outputs, labels)
 
 def metric_dis_mcc(outputs: torch.tensor, labels: torch.tensor) -> float:
     """ Returns mathews correlation coefficient disorder metric
@@ -153,7 +177,7 @@ def metric_dis_mcc(outputs: torch.tensor, labels: torch.tensor) -> float:
     mask = get_mask(labels)
 
     labels = labels[:, :, 1].unsqueeze(2)
-    labels = torch.argmax(torch.cat([labels, 1 - labels], dim=2), dim=2)[mask == 1]
+    labels = torch.argmax(torch.cat([labels, 1.0 - labels], dim=2), dim=2)[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
 
     return mcc(outputs, labels)
@@ -168,7 +192,7 @@ def metric_dis_fpr(outputs: torch.tensor, labels: torch.tensor) -> float:
     mask = get_mask(labels)
 
     labels = labels[:, :, 1].unsqueeze(2)
-    labels = torch.argmax(torch.cat([labels, 1 - labels], dim=2), dim=2)[mask == 1]
+    labels = torch.argmax(torch.cat([labels, 1.0 - labels], dim=2), dim=2)[mask == 1]
     outputs = torch.argmax(outputs, dim=2)[mask == 1]
 
     return fpr(outputs, labels)
