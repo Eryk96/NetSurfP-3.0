@@ -1,6 +1,10 @@
 import os
 import pdb
 import random
+import optuna
+
+import matplotlib.pyplot as plt
+
 from typing import Any, List, Tuple, Dict
 from types import ModuleType
 
@@ -80,7 +84,6 @@ def train(cfg: dict, resume: str):
 
     log.info('Finished!')
 
-
 def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
     """ Predict using trained model and file or string input
     Args:
@@ -99,6 +102,86 @@ def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
     result = pred(input_data)
 
     return result
+
+
+def hyperparameter_optim(cfg: dict, resume: str):
+    """ Loads configuration and hyperparameter optimizes the learning rate
+    args:
+        cfg: dictionary containing the configuration of the experiment
+        resume: path to a previous resumed model
+    """
+    study = optuna.create_study(direction="minimize") 
+
+    def objective(trial):
+        log.debug(f'Hyperparameters: {cfg}')
+        seed_everything(cfg['seed'])
+
+        model = get_instance(module_arch, 'arch', cfg)
+
+        lr = trial.suggest_float("lr", 1e-6, 1e-1, log=True)
+
+        cfg['optimizer']['args']['lr'] = lr
+
+        model, device = setup_device(model, cfg['target_devices'])
+        torch.backends.cudnn.benchmark = True  # disable if not consistent input sizes
+
+        param_groups = setup_param_groups(model, cfg['optimizer'])
+        optimizer = get_instance(module_optimizer, 'optimizer', cfg, param_groups)
+        lr_scheduler = get_instance(module_scheduler, 'lr_scheduler', cfg, optimizer)
+        model, optimizer, start_epoch = resume_checkpoint(resume, model, optimizer, cfg)
+
+        transforms = get_instance(module_aug, 'augmentation', cfg)
+        data_loader = get_instance(module_data, 'data_loader', cfg)
+        valid_data_loader = data_loader.split_validation()
+        test_data_loader = data_loader.get_test()
+
+        log.info('Getting loss and metric function handles')
+        loss = getattr(module_loss, cfg['loss'])
+
+        metrics = [getattr(module_metric, met) for met, _ in cfg['metrics'].items()]
+        metrics_task = [task for _, task in cfg['metrics'].items()]
+
+        log.info('Initialising trainer')
+        trainer = Trainer(model, loss, metrics, metrics_task, optimizer,
+                            start_epoch=start_epoch,
+                            config=cfg,
+                            device=device,
+                            data_loader=data_loader,
+                            batch_transform=transforms,
+                            valid_data_loader=valid_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            trial=trial)
+
+        result = trainer.train()
+        return result['val_loss']
+
+    study.optimize(objective, n_trials=2, timeout=600)
+
+    pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
+    complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+
+    log.info("Study statistics:")
+    log.info("Number of finished trials: {}".format(len(study.trials)))
+    log.info("Number of pruned trials: {}".format(len(pruned_trials)))
+    log.info("Number of complete trials: {}".format(len(complete_trials)))
+
+    log.info("Best trial:")
+    trial = study.best_trial
+
+    log.info("Value: {}".format(trial.value))
+
+    log.info("Params:")
+    for key, value in trial.params.items():
+        log.info("{}: {}".format(key, value))
+
+    # Plot optimization history
+    plt.style.use(['science', 'ieee'])
+    plt.rcParams["figure.figsize"]=(3, 2)
+    optuna.visualization.matplotlib.plot_optimization_history(study)
+    plt.title("")
+    plt.xlabel("$trials$")
+    plt.ylabel("$Objective$ $value$")
+    plt.savefig("results/optimization_history.png")
 
 
 def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.device, List[int]]:
@@ -155,7 +238,7 @@ def setup_param_groups(model: nn.Module, config: dict) -> list:
 
 
 def resume_checkpoint(resume_path: str, model: nn.Module, 
-    optimizer: module_optimizer, config: dict) -> (nn.Module, module_optimizer, int):
+    optimizer: module_optimizer, config: dict):
     """ Resume from saved checkpoint. """
     if not resume_path:
         return model, optimizer, 0

@@ -109,6 +109,8 @@ class TrainerBase:
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
+            return result
+
     def _train_epoch(self, epoch: int) -> dict:
         """ Training logic for an epoch. """
 

@@ -7,14 +7,19 @@ data_redundancy.ipynb
 # dont include models
 /models/*.pt
 /models/prot_t5_xl_bfd/*
+/models/nsp3.pth
 *.pt
 
+# dont include test experiments
 experiments/test
 
+# dont include plots
+/notebooks/nsp3/plots
 
 # dont include data
 /data/nsp3/training_data/*.npz
 /data/nsp2/training_data/*.npz
+/data/analysis
 
 # dont include computerome errors or logs
 /notebooks/sh/errors/*

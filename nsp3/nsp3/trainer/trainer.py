@@ -1,4 +1,5 @@
 import torch
+import optuna
 import numpy as np
 
 from torchvision.utils import make_grid
@@ -11,7 +12,7 @@ class Trainer(TrainerBase):
     """ Responsible for training loop and validation. """
 
     def __init__(self, model, loss, metrics, metrics_task, optimizer, start_epoch, config, device,
-                 data_loader, batch_transform, valid_data_loader=None, lr_scheduler=None):
+                 data_loader, batch_transform, valid_data_loader=None, lr_scheduler=None, trial=None):
         super().__init__(model, loss, metrics, metrics_task, optimizer, start_epoch, config, device)
         self.data_loader = data_loader
         self.valid_data_loader = valid_data_loader
@@ -19,6 +20,7 @@ class Trainer(TrainerBase):
         self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size)) * 8
         self.batch_transform = batch_transform
+        self.trial = trial
 
     def _train_epoch(self, epoch: int) -> dict:
         """ Training logic for an epoch
@@ -158,6 +160,13 @@ class Trainer(TrainerBase):
         self.writer.add_scalar('loss', loss_mtr.avg)
         for mtr in metric_mtrs:
             self.writer.add_scalar(mtr.name, mtr.avg)
+
+        if self.trial:
+            self.trial.report(loss_mtr.avg, epoch)
+
+            # Handle pruning based on the intermediate value.
+            if self.trial.should_prune():
+                raise optuna.exceptions.TrialPruned()
 
         return {
             'val_loss': loss_mtr.avg,

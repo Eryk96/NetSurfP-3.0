@@ -86,6 +86,32 @@ def rsa(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
 
     return mse(outputs, labels, mask)
 
+def rsa_iso(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+    """ Returns relative surface accesibility loss
+    Args:
+        outputs: tensor with rsa predictions
+        labels: tensor with labels
+    """
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
+    mask = mask.unsqueeze(2)
+
+    labels = labels[:, :, 5].unsqueeze(2)
+
+    return mse(outputs, labels, mask)
+
+def rsa_cpx(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+    """ Returns relative surface accesibility loss
+    Args:
+        outputs: tensor with rsa predictions
+        labels: tensor with labels
+    """
+    mask = get_mask(labels, use_disorder_mask=True, use_unknown_mask=True)
+    mask = mask.unsqueeze(2)
+
+    labels = labels[:, :, 6].unsqueeze(2)
+
+    return mse(outputs, labels, mask)
+
 
 def phi(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns phi loss
@@ -141,9 +167,9 @@ def multi_task_loss(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor
     return loss.sum()
 
 
-def multi_task_remapped(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
+def multi_task_extended(outputs: torch.tensor, labels: torch.tensor) -> torch.tensor:
     """ Returns a weighted multi task loss. 
-        Combines ss8, ss3, disorder, rsa, phi and psi loss.
+        Combines ss8, ss3, disorder, rsa_iso, rsa_cpx, phi and psi loss.
     Args:
         outputs: tensor with psi predictions
         labels: tensor with labels
@@ -151,11 +177,12 @@ def multi_task_remapped(outputs: torch.tensor, labels: torch.tensor) -> torch.te
     # weighted losses
     _ss8 = ss8(outputs[0], labels) * 1
     _dis = disorder(outputs[1], labels) * 5
-    _rsa = rsa(outputs[2], labels) * 100
-    _phi = phi(outputs[3], labels) * 5
-    _psi = psi(outputs[4], labels) * 5
+    _rsa_iso = rsa_iso(outputs[2], labels) * 100
+    _rsa_cpx = rsa_cpx(outputs[3], labels) * 100
+    _phi = phi(outputs[4], labels) * 5
+    _psi = psi(outputs[5], labels) * 5
 
-    loss = torch.stack([_ss8, _dis, _rsa, _phi, _psi])
+    loss = torch.stack([_ss8, _dis, _rsa_iso, _rsa_cpx, _phi, _psi])
 
     return loss.sum()
 
