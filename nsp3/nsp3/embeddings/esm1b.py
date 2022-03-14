@@ -82,7 +82,9 @@ class ESM1bEmbedding(nn.Module):
                 embedding = torch.cat([embedding[:, :o1], self.model(
                     batch_tokens[:, o1:o2], repr_layers=[33])["representations"][33]], dim=1)
 
-            embedding = torch.nan_to_num(embedding)
+            # PyTorch 1.7 trick to do nan_to_num
+            embedding[embedding != embedding] = 0.0
+            #embedding = torch.nan_to_num(embedding)
 
         # add padding
         if padding_length:

@@ -13,9 +13,11 @@ class BasePredict(object):
 
         # Load model data
         self.model = model
+
+        print(f"Loading model... \n")
+ 
         data = torch.load(model_data, map_location ='cpu')
         self.model.load_state_dict(data['state_dict'])
-
         self.model.eval()
 
     def preprocess(self, x: torch.tensor):

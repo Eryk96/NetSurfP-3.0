@@ -1,8 +1,8 @@
 biolib_version: 2
 modules:
     main:
-        image: 'local-docker://nsp-docker:latest'
-        command: python predict.py
+        image: 'local-docker://nsp3:latest'
+        command: python3 predict.py
         working_directory: /home/biolib/
         input_files:
             - COPY / /home/biolib/
@@ -10,13 +10,17 @@ modules:
             - COPY /home/biolib/ /
         source_files:
             - COPY / /home/biolib/
+        required_cpu_in_nano_shares: 6000000000
+        required_memory_in_bytes: 28000000000
+        gpu: required
+
 arguments:
     -
-        default_value: 'example.txt'
+        default_value: 'sample.fasta'
         description: Insert fasta sequence(s)
         key: '--input_data'
         key_value_separator: ' '
         required: true
         type: file
 
-output_type: markdown
+main_output_file: /output.md
