@@ -1,6 +1,7 @@
 import sys
 import torch
 import torch.nn.functional as F
+from tqdm import tqdm
 
 from io import StringIO
 from Bio import SeqIO
@@ -9,10 +10,16 @@ from nsp3.base.base_predict import BasePredict
 from nsp3.data_loader.augmentation import string_token
 from nsp3.models.metric import arctan_dihedral
 
+
+def list_to_chunked_list(input_list, chunk_size):
+    for chunk_offset in range(0, len(input_list), chunk_size):
+        yield input_list[chunk_offset:chunk_offset + chunk_size]
+
+
 class SecondaryFeatures(BasePredict):
 
     def __init__(self, model, model_data):
-        super(SecondaryFeatures).__init__(model, model_data)
+        super(SecondaryFeatures, self).__init__(model, model_data)
         """ Predict secondary features by using raw AA sequence
         Args:
             model: instantiated model class
@@ -53,6 +60,10 @@ class SecondaryFeatures(BasePredict):
             x: list containing a tuple with name and protein sequence
         """
         x = self.transform(x)
+        
+        if torch.cuda.is_available():
+            x = x.to('cuda:0')
+            
         x = self.model.forward(x, mask)
         return x
 
@@ -78,11 +89,26 @@ class SecondaryFeatures(BasePredict):
     def __call__(self, x):
         """ Prediction call logic """
         fasta, mask = self.preprocessing(x)
-        x = self.inference(fasta, mask)
-        x = self.postprocessing(x)
 
-        identifier = [element[0] for element in fasta]
-        sequence = [element[1] for element in fasta]
-        prediction = [x[i].detach().numpy() for i in range(len(x))]
+        identifier = []
+        sequence = []
+        prediction = []
+        chunk_size = 25
+        sequences_chunked = list_to_chunked_list(fasta, chunk_size)
+        
+        import datetime
+        print(f"Processing sequences in batches of {chunk_size}... ")
+        with tqdm(total=len(fasta), desc='Generating predictions', unit='seq') as progress_bar:
+            for idx, chunk in enumerate(sequences_chunked):
+                chunk_mask = torch.tensor([len(seq[1]) for seq in chunk])
+
+                x = self.inference(chunk, chunk_mask)
+                x = self.postprocessing(x)
+
+                identifier.append([element[0] for element in chunk])
+                sequence.append([element[1] for element in chunk])
+                prediction.append([torch.Tensor.cpu(x[i]).detach().numpy() for i in range(len(x))])
+                
+                progress_bar.update(len(chunk))
 
         return identifier, sequence, prediction

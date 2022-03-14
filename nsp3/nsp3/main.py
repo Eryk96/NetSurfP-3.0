@@ -2,6 +2,7 @@ import os
 import pdb
 import random
 import optuna
+import time
 
 import matplotlib.pyplot as plt
 
@@ -98,6 +99,14 @@ def predict(cfg: dict, pred_name: str, model_data: str, input_data: str):
 
     # load model and predict
     model = get_instance(module_arch, 'arch', cfg)
+    
+    # send model to GPU
+    if torch.cuda.is_available():
+        print("Using GPU... \n")
+        setup_device(model, [torch.cuda.current_device()])
+    else:
+        print("Using CPU... \n")
+
     pred = getattr(module_pred, pred_name)(model, model_data)
     result = pred(input_data)
 
@@ -218,7 +227,6 @@ def setup_device(model: nn.Module, target_devices: List[int]) -> Tuple[torch.dev
 
     log.info(f'Using devices {target_devices} of available devices {available_devices}')
     device = torch.device(f'cuda:{target_devices[0]}')
-
     if len(target_devices) > 1:
         model = nn.DataParallel(model, device_ids=target_devices).to(device)
     else:
