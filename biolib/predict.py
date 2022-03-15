@@ -48,16 +48,16 @@ for identifiers, sequences, predictions in zip(result[0], result[1], result[2]):
         letters = np.expand_dims([letter for letter in sequences[i]], axis=1)
         df = np.concatenate([pred[i][:len(letters)] for pred in predictions], axis=1)
         
-        df = np.concatenate([letters, df], axis=1)
-        
         # convert q8 and q3 probabilites to symbol
         df_q8 = np.expand_dims([Q8[val]
-                                for val in np.argmax(df[:, 1:9], axis=1)], axis=1)
+                                for val in np.argmax(df[:, 0:8], axis=1)], axis=1)
         df = np.concatenate([df, df_q8], axis=1)
         
         df_q3 = np.expand_dims([Q3[val]
-                                for val in np.argmax(df[:, 9:12], axis=1)], axis=1)
+                                for val in np.argmax(df[:, 8:11], axis=1)], axis=1)
         df = np.concatenate([df, df_q3], axis=1)
+        
+        df = np.concatenate([letters, df], axis=1)
         
         df = pd.DataFrame(df)
         df = df.set_axis(CSV_header, axis=1, inplace=False)
