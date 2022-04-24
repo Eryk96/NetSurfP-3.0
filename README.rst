@@ -243,3 +243,4 @@ this template are basically wrappers for those of `tensorboard.SummaryWriter` mo
 
 **Note**: You don't have to specify current steps, since `TensorboardWriter` class defined at
 `logger/visualization.py` will track current steps.
+
