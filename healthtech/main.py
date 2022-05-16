@@ -212,11 +212,15 @@ def main(args):
         else:
             log.error(f"Max residues ({residue_count} / {MAX_RESIDUES}) reached")
             sys.exit(f"Max residues ({residue_count} / {MAX_RESIDUES}) reached")
-
-        matched_residues = [char in RESIDUE_TRANSLATION.values() for char in body]
+            
+        matched_residues = np.array([char in RESIDUE_TRANSLATION.values() for char in body])
 
         if not all(matched_residues):
-            log.error("Sequence contains wrong residue characters")
+            invalid_header = header
+            invalid_seq = np.array(list(body.lower()))
+            invalid_res = list(np.where(~matched_residues)[0])
+            invalid_seq[invalid_res] = np.char.upper(invalid_seq[invalid_res])
+            log.error(f"Sequence contains invalid residue characters characters {''.join(invalid_seq[invalid_res])}:\nHeader {invalid_header}\nSequence {''.join(invalid_seq)}")
             sys.exit("Sequence contains wrong residue characters")
 
         if len(fasta_sequences) <= MAX_SEQUENCES:
