@@ -61,6 +61,7 @@ RESIDUE_TRANSLATION = {
     18: "V",
     19: "W",
     20: "Y",
+    21: "U",
 }
 
 max_asa = {
@@ -85,6 +86,7 @@ max_asa = {
   'W': 285.0, 
   'Y': 263.0, 
   'V': 174.0,
+  'U': 167.0,
 }
 
 netsurfp_1_header = """
