@@ -64,6 +64,8 @@ RESIDUE_TRANSLATION = {
     21: "U",
 }
 
+# Tien et al 2013 Maximum Allowed Solvent Accessibilites of Residues in Proteins
+# 10.1371/journal.pone.0080635
 max_asa = {
   'X': 0.0,
   'A': 129.0, 
@@ -86,7 +88,7 @@ max_asa = {
   'W': 285.0, 
   'Y': 263.0, 
   'V': 174.0,
-  'U': 167.0,
+  'U': 167.0, # Based on C
 }
 
 netsurfp_1_header = """
