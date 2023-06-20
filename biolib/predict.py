@@ -34,11 +34,19 @@ Q8, Q3 = ("GHIBESTC", "HEC")
 CSV_header = ["residue", "q8(g)", "q8(h)", "q8(i)", "q8(b)", "q8(e)", "q8(s)", "q8(t)", "q8(c)",
               "q3(h)", "q3(e)", "q3(c)", "disorder(p_f)", "disorder(p_t)", "rsa", "phi", "psi", "q8", "q3"]
 
+#def get_valid_filename(s):
+#    s = str(s).strip().replace(' ', '_')
+#    return re.sub(r'(?u)[^-\w.]', '', s)
 
+# MH update 20th June 2023: Fix long fasta header breaking os.makedirs
 def get_valid_filename(s):
+    """ Returns a valid filename from string """
+    # Replace spaces with '_'
     s = str(s).strip().replace(' ', '_')
-    return re.sub(r'(?u)[^-\w.]', '', s)
-
+    # Strip non-word characters
+    s = re.sub(r'(?u)[^-\w.]', '', s)
+    # Limit to 80 characters
+    return s[:80]
 
 output_file = open('output.md', 'w')
 
