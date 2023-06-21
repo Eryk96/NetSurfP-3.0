@@ -94,12 +94,12 @@ max_asa = {
 netsurfp_1_header = """
 # For publication of results, please cite:
 # ...
-# ... Michael Schantz Klausen, Martin Closter Jespersen, Henrik Nielsen, Kamilla Kjærgaard Jensen, 
-# ... Vanessa Isabell Jurtz, Casper Kaae Sønderby, Morten Otto Alexander Sommer, Ole Winther, 
-# ... Morten Nielsen, Bent Petersen, and Paolo Marcatili. 
-# ... NetSurfP-2.0: Improved prediction of protein structural features by integrated deep learning.
-# ... Proteins: Structure, Function, and Bioinformatics (Feb. 2019).
-# ... https://doi.org/10.1002/prot.25674
+# ... Magnus Haraldson Høie, Erik Nicolas Kiehl, Bent Petersen, Morten Nielsen, Ole Winther,
+# ... Henrik Nielsen, Jeppe Hallgren, Paolo Marcatili.
+# ... NetSurfP-3.0: accurate and fast prediction of protein structural features by protein
+# ... language models and deep learning.
+# ... Nucleic Acids Research: Volume 50, Issue W1, 5 July 2022, Pages W510–W515,
+# ... https://doi.org/10.1093/nar/gkac439
 # ...
 #
 # Column 1: Class assignment - B for buried or E for Exposed - Threshold: 25% exposure, but not based on RSA
